@@ -8,8 +8,19 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get -qq install g++-4.9
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
+  - sudo wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz
+  - sudo tar xvf release-1.8.0.tar.gz
+  - cd googletest-release-1.8.0
+  - sudo cmake . && make
+  - sudo cp -a googletest/include/gtest /usr/include
+  - sudo cp -a googlemock/gtest/libgtest.a /usr/lib
+  - sudo cp -a googlemock/gtest/libgtest_main.a /usr/lib
+  - cd ${TRAVIS_BUILD_DIR}
 
 script:
   - mkdir build
   - cd build
-  - cmake .. && make
+  - cmake ..
+  - make
+  - make tests
+  - make examples
