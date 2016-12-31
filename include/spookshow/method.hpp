@@ -50,9 +50,7 @@ namespace spookshow
       }
 
     private:
-
       T m_value;
-
     };
 
   }
@@ -79,11 +77,32 @@ namespace spookshow
     {
     public:
 
+      /**
+       * Requires that an argument be equal to a value in order to fulfill this expectation.
+       */
+      template <int index, typename T>
+      expectation_entry* when_arg_eq(const T& value)
+      {
+	return when([value] (TArgs... args) -> bool {
+	    return (std::get<index>(std::tuple<TArgs...>(args...)) == value);
+	  });
+      }
+
+      /**
+       * Adds a condition to the fulfillment of this expectation.
+       */
+      expectation_entry* when(const std::function<bool(TArgs...)>& condition)
+      {
+	m_conditions.push_back(condition);
+	return this;
+      }
+
     private:
 
       friend class method<TRet(TArgs...)>;
 
       expectation* const m_expectation;
+      std::vector<std::function<bool(TArgs...)>> m_conditions;
 
       expectation_entry(expectation* expectation)
         : m_expectation(expectation)
@@ -92,8 +111,10 @@ namespace spookshow
       /** Returns true if the expectation is fulfilled by a call with the specified arguments. */
       bool is_fulfilled_by(TArgs... args) const
       {
-        // TODO
-        return true;
+	for (const auto& condition : m_conditions)
+	  if (!condition(args...))
+	    return false;
+	return true;
       }
 
     };
@@ -330,7 +351,7 @@ namespace spookshow
    * Creates an `internal::returns` token.
    */
   template <typename T>
-  inline internal::returns_token<T> returns(T value)
+  inline internal::returns_token<T> returns(const T& value)
   {
     return internal::returns_token<T>(value);
   }

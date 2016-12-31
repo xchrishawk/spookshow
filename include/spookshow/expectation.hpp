@@ -85,6 +85,14 @@ namespace spookshow
     }
 
     /**
+     * Returns `true` if this expectation has been fulfilled.
+     */
+    bool is_fulfilled() const
+    {
+      return (m_count >= m_required_count);
+    }
+
+    /**
      * Fulfills this expectation once.
      */
     void fulfill();

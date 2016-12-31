@@ -31,6 +31,14 @@
   }												\
   spookshow::method<ret(t0)> SPOOKSHOW_METHOD_OBJ_(meth) { #meth }
 
+#define SPOOKSHOW_MAKE_MOCK_METHOD_2_IMPL_(ret, meth, constness, t0, t1)			\
+  virtual ret meth(t0 arg0, t1 arg1) constness override						\
+  {												\
+    SPOOKSHOW_METHOD_OBJ_(meth).set_name(__PRETTY_FUNCTION__);					\
+    return SPOOKSHOW_METHOD_OBJ_(meth).invoke(arg0, arg1);					\
+  }												\
+  spookshow::method<ret(t0, t1)> SPOOKSHOW_METHOD_OBJ_(meth) { #meth }
+
 /* -- Public Macros -- */
 
 #define SPOOKSHOW_MOCK_METHOD(obj, meth)							\
@@ -42,8 +50,14 @@
 #define SPOOKSHOW_MAKE_MOCK_METHOD_1(ret, meth, t0)						\
   SPOOKSHOW_MAKE_MOCK_METHOD_1_IMPL_(ret, meth, , t0)
 
+#define SPOOKSHOW_MAKE_MOCK_METHOD_2(ret, meth, t0, t1)						\
+  SPOOKSHOW_MAKE_MOCK_METHOD_2_IMPL_(ret, meth, , t0, t1)
+
 #define SPOOKSHOW_MAKE_CONST_MOCK_METHOD_0(ret, meth)						\
   SPOOKSHOW_MAKE_MOCK_METHOD_0_IMPL_(ret, meth, const)
 
 #define SPOOKSHOW_MAKE_CONST_MOCK_METHOD_1(ret, meth, t0)					\
   SPOOKSHOW_MAKE_MOCK_METHOD_1_IMPL_(ret, meth, const, t0)
+
+#define SPOOKSHOW_MAKE_CONST_MOCK_METHOD_2(ret, meth, t0, t1)					\
+  SPOOKSHOW_MAKE_MOCK_METHOD_2_IMPL_(ret, meth, const, t0, t1)

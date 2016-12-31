@@ -29,7 +29,7 @@ expectation::expectation(const std::string& name, int required_count)
 
 expectation::~expectation()
 {
-  if (m_count >= m_required_count)
+  if (is_fulfilled())
     return;
 
   std::ostringstream message;
