@@ -16,6 +16,8 @@
 namespace spookshow
 {
 
+  class expectation_order;
+
   /**
    * Class representing an expectation which must be fulfilled.
    */
@@ -75,6 +77,14 @@ namespace spookshow
   public:
 
     /**
+     * The name of this expectation.
+     */
+    std::string name() const
+    {
+      return m_name.empty() ? "No Name" : m_name;
+    }
+
+    /**
      * Fulfills this expectation once.
      */
     void fulfill();
@@ -83,6 +93,7 @@ namespace spookshow
 
     const std::string m_name;
     const int m_required_count;
+    expectation_order* const m_order;
     int m_count;
 
   };

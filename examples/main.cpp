@@ -15,6 +15,7 @@ namespace
 {
   void fail_handler(const std::string& message);
   void expectation_demo();
+  void expectation_order_demo();
 }
 
 /* -- Procedures -- */

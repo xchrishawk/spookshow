@@ -27,6 +27,7 @@ include_directories(${INCLUDE_DIR})
 # main static library
 add_library(${LIBRARY_NAME} STATIC
   ${SRC_DIR}/expectation.cpp
+  ${SRC_DIR}/expectation_order.cpp
   ${SRC_DIR}/spookshow.cpp)
 
 # executable with examples

@@ -6,6 +6,8 @@
 
 /* -- Includes -- */
 
+#include <cstdlib>
+#include <iostream>
 #include <stdexcept>
 
 #include <spookshow/spookshow.hpp>
@@ -34,4 +36,10 @@ void spookshow::internal::handle_failure(const std::string& message)
     user_fail_handler(message);
   else
     throw std::logic_error("Spookshow fail handler was not set!");
+}
+
+[[noreturn]] void spookshow::internal::handle_error(const std::string& message)
+{
+  std::cerr << message << std::endl;
+  std::abort();
 }

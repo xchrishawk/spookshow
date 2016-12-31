@@ -12,6 +12,7 @@
 #include <functional>
 
 #include <spookshow/expectation.hpp>
+#include <spookshow/expectation_order.hpp>
 
 /* -- Types -- */
 
@@ -40,6 +41,11 @@ namespace spookshow
      * Reports a test failure to the failure handler.
      */
     void handle_failure(const std::string& message);
+
+    /**
+     * Handles an unrecoverable test logic error. This method does not return.
+     */
+    [[noreturn]] void handle_error(const std::string& message);
 
   }
 
