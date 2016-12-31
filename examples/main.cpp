@@ -36,6 +36,7 @@ namespace
   void returns_demo();
   void const_demo();
   void skip_clear_demo();
+  void fulfills_demo();
 }
 
 /* -- Constants -- */
@@ -52,6 +53,7 @@ namespace
     { "returns",			returns_demo },
     { "const",				const_demo },
     { "skip_clear",			skip_clear_demo },
+    { "fulfills",			fulfills_demo },
   };
 }
 
@@ -239,7 +241,7 @@ namespace
 
     std::cout << std::endl << "Enqueuing functor with repeats(2), then calling 3 times..." << std::endl;
     SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->repeats(2, [] {
-	std::cout << "(From Functor) This can be called 3 times." << std::endl;
+	std::cout << "(From Functor) This can be called 2 times." << std::endl;
       });
 
     mock.void_no_args();
@@ -383,6 +385,28 @@ namespace
 
     std::cout << "Calling clear() to clear the queue, and calling once..." << std::endl;
     SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->clear();
+
+    mock.void_no_args();
+
+    std::cout << std::endl;
+  }
+
+  void fulfills_demo()
+  {
+    std::cout << "-- Fulfills Demo --" << std::endl << std::endl;
+
+    examples::object_mock mock;
+
+    std::cout << "Creating expectation and queuing functor to fulfill it, and calling once..." << std::endl;
+    expectation exp1("Should be fulfilled by a mock method call");
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops())->fulfills(exp1);
+
+    mock.void_no_args();
+
+    std::cout << "Creating additional expectation which will only be fulfilled by second call, and calling once..." << std::endl;
+    expectation exp2("This will not be fulfilled");
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops())->fulfills(exp2);
 
     mock.void_no_args();
 

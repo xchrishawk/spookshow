@@ -73,9 +73,9 @@ namespace spookshow
     typedef std::function<TRet(TArgs...)> functor;
 
     /**
-     * Class representing an entry in the functor queue.
+     * Class representing an expectation that a functor may fulfill.
      */
-    class functor_entry
+    class expectation_entry
     {
     public:
 
@@ -83,8 +83,45 @@ namespace spookshow
 
       friend class method<TRet(TArgs...)>;
 
+      expectation* const m_expectation;
+
+      expectation_entry(expectation* expectation)
+        : m_expectation(expectation)
+      { }
+
+      /** Returns true if the expectation is fulfilled by a call with the specified arguments. */
+      bool is_fulfilled_by(TArgs... args) const
+      {
+        // TODO
+        return true;
+      }
+
+    };
+
+    /**
+     * Class representing an entry in the functor queue.
+     */
+    class functor_entry
+    {
+    public:
+
+      /**
+       * Adds an expectation which may be fulfilled when this functor entry is called.
+       */
+      std::shared_ptr<expectation_entry> fulfills(expectation& exp)
+      {
+        std::shared_ptr<expectation_entry> entry(new expectation_entry(&exp));
+        m_expectations.push_back(entry);
+        return entry;
+      }
+
+    private:
+
+      friend class method<TRet(TArgs...)>;
+
       int m_count;
-      functor m_functor;
+      const functor m_functor;
+      std::vector<std::shared_ptr<expectation_entry>> m_expectations;
 
       functor_entry(int count, const functor& functor)
 	: m_count(count),
@@ -121,6 +158,10 @@ namespace spookshow
       if (!m_functor_queue.empty())
       {
 	const auto& entry = m_functor_queue.front();
+
+        for (auto& expectation_entry : entry->m_expectations)
+          if (expectation_entry->is_fulfilled_by(args...))
+            expectation_entry->m_expectation->fulfill();
 
 	if (entry->m_count != INFINITE)
 	{
