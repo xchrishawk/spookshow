@@ -20,7 +20,4 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake ..
-  - make
-  - make tests
-  - make examples
+  - cmake .. && make && make examples && make tests && ./tests
