@@ -41,3 +41,9 @@
 
 #define SPOOKSHOW_MAKE_MOCK_METHOD_1(ret, meth, t0)						\
   SPOOKSHOW_MAKE_MOCK_METHOD_1_IMPL_(ret, meth, , t0)
+
+#define SPOOKSHOW_MAKE_CONST_MOCK_METHOD_0(ret, meth)						\
+  SPOOKSHOW_MAKE_MOCK_METHOD_0_IMPL_(ret, meth, const)
+
+#define SPOOKSHOW_MAKE_CONST_MOCK_METHOD_1(ret, meth, t0)					\
+  SPOOKSHOW_MAKE_MOCK_METHOD_1_IMPL_(ret, meth, const, t0)

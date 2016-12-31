@@ -6,7 +6,10 @@
 
 /* -- Includes -- */
 
+#include <functional>
 #include <iostream>
+#include <map>
+
 #include <spookshow/spookshow.hpp>
 
 #include "object.hpp"
@@ -21,12 +24,33 @@ using namespace spookshow;
 namespace
 {
   void example_fail_handler(const std::string& message);
+
+  void run_all();
+  void print_help();
+
   void expectation_demo();
   void expectation_order_demo();
   void expectation_order_stack_demo();
   void mock_lambda_demo();
   void noops_demo();
   void returns_demo();
+  void const_demo();
+}
+
+/* -- Constants -- */
+
+namespace
+{
+  static const std::map<std::string, std::function<void()>> DEMOS =
+  {
+    { "expectation", 			expectation_demo },
+    { "expectation_order", 		expectation_order_demo },
+    { "expectation_order_stack",	expectation_order_stack_demo },
+    { "mock_lambda",			mock_lambda_demo },
+    { "noops",				noops_demo },
+    { "returns",			returns_demo },
+    { "const",				const_demo },
+  };
 }
 
 /* -- Procedures -- */
@@ -34,12 +58,24 @@ namespace
 int main(int argc, char** argv)
 {
   set_fail_handler(example_fail_handler);
-  expectation_demo();
-  expectation_order_demo();
-  expectation_order_stack_demo();
-  mock_lambda_demo();
-  noops_demo();
-  returns_demo();
+
+  for (int arg = 1; arg < argc; arg++)
+  {
+    const std::string example(argv[arg]);
+    if (example == "--all")
+      run_all();
+    else if (example == "--help")
+      print_help();
+    else
+    {
+      auto it = DEMOS.find(example);
+      if (it != DEMOS.end())
+        it->second();
+      else
+        std::cout << "Unknown example: " << example << std::endl;
+    }
+  }
+
   return 0;
 }
 
@@ -56,6 +92,29 @@ namespace
   void example_fail_handler(const std::string& message)
   {
     std::cerr << "<<TEST FAIL>> " << message << std::endl;
+  }
+
+  /**
+   * Runs all examples.
+   */
+  void run_all()
+  {
+    for (const auto& item : DEMOS)
+      item.second();
+  }
+
+  /**
+   * Prints the help screen.
+   */
+  void print_help()
+  {
+    std::cout << "Usage: examples [example1] [example2]..." << std::endl << std::endl;
+    std::cout << "List of examples:" << std::endl;
+    for (const auto& item : DEMOS)
+      std::cout << "- " <<  item.first << std::endl;
+    std::cout << std::endl;
+    std::cout << "examples --all: Runs all examples" << std::endl;
+    std::cout << "examples --help: Displays this help info" << std::endl;
   }
 
   /**
@@ -176,8 +235,8 @@ namespace
     mock.void_no_args();
     mock.void_no_args();
 
-    std::cout << std::endl << "Enqueuing functor with repeat(2), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->repeat(2, [] {
+    std::cout << std::endl << "Enqueuing functor with repeats(2), then calling 3 times..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->repeats(2, [] {
 	std::cout << "(From Functor) This can be called 3 times." << std::endl;
       });
 
@@ -220,8 +279,8 @@ namespace
     mock.void_no_args();
     mock.void_no_args();
 
-    std::cout << "Enqueuing noops with repeat(2), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_one_arg)->repeat(2, noops());
+    std::cout << "Enqueuing noops with repeats(2), then calling 3 times..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_one_arg)->repeats(2, noops());
 
     mock.void_one_arg(15);
     mock.void_one_arg(20);
@@ -252,8 +311,8 @@ namespace
     std::cout << "Returned: " << mock.int_no_args() << std::endl;
     std::cout << "Returned: " << mock.int_no_args() << std::endl;
 
-    std::cout << "Enqueuing returns(2) with repeat(2), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, int_one_arg)->repeat(2, returns(2));
+    std::cout << "Enqueuing returns(2) with repeats(2), then calling 3 times..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, int_one_arg)->repeats(2, returns(2));
 
     std::cout << "Returned: " << mock.int_one_arg(5) << std::endl;
     std::cout << "Returned: " << mock.int_one_arg(10) << std::endl;
@@ -271,4 +330,21 @@ namespace
 
     std::cout << std::endl;
   }
+
+  void const_demo()
+  {
+    std::cout << "-- Const Demo --" << std::endl << std::endl;
+
+    const examples::object_mock mock;
+
+    std::cout << "Mock object is const, but we can still mock methods with a different macro:" << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, const_void_no_args)->once([] {
+        std::cout << "(From Functor) Hello from a mocked const method!" << std::endl;
+      });
+
+    mock.const_void_no_args();
+
+    std::cout << std::endl;
+  }
+
 }

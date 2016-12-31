@@ -143,7 +143,7 @@ namespace spookshow
      * Enqueues a no-op which may be performed once.
      */
     template <typename... _>
-    std::shared_ptr<functor_entry> once(const internal::noops_token&)
+    std::shared_ptr<functor_entry> once(const internal::noops_token&) const
     {
       return once([] (TArgs...) -> void { });
     }
@@ -152,7 +152,7 @@ namespace spookshow
      * Enqueues a value which may be returned once.
      */
     template <typename T>
-    std::shared_ptr<functor_entry> once(const internal::returns_token<T>& token)
+    std::shared_ptr<functor_entry> once(const internal::returns_token<T>& token) const
     {
       return once([token] (TArgs...) -> T {
 	  return token.value();
@@ -162,7 +162,7 @@ namespace spookshow
     /**
      * Enqueues a functor which may be performed once.
      */
-    std::shared_ptr<functor_entry> once(const functor& functor)
+    std::shared_ptr<functor_entry> once(const functor& functor) const
     {
       return enqueue_functor(1, functor);
     }
@@ -171,18 +171,18 @@ namespace spookshow
      * Enqueues a no-op which may be performed a finite number of times.
      */
     template <typename... _>
-    std::shared_ptr<functor_entry> repeat(int count, const internal::noops_token&)
+    std::shared_ptr<functor_entry> repeats(int count, const internal::noops_token&) const
     {
-      return repeat(count, [] (TArgs...) -> void { });
+      return repeats(count, [] (TArgs...) -> void { });
     }
 
     /**
      * Enqueues a value which may be returned a finite number of times.
      */
     template <typename T>
-    std::shared_ptr<functor_entry> repeat(int count, const internal::returns_token<T>& token)
+    std::shared_ptr<functor_entry> repeats(int count, const internal::returns_token<T>& token) const
     {
-      return repeat(count, [token] (TArgs...) -> T {
+      return repeats(count, [token] (TArgs...) -> T {
 	  return token.value();
 	});
     }
@@ -190,7 +190,7 @@ namespace spookshow
     /**
      * Enqueues a functor which may be performed a finite number of times.
      */
-    std::shared_ptr<functor_entry> repeat(int count, const functor& functor)
+    std::shared_ptr<functor_entry> repeats(int count, const functor& functor) const
     {
       return enqueue_functor(count, functor);
     }
@@ -199,7 +199,7 @@ namespace spookshow
      * Enqueues a no-op which may be performed an infinite number of times.
      */
     template <typename... _>
-    std::shared_ptr<functor_entry> always(const internal::noops_token&)
+    std::shared_ptr<functor_entry> always(const internal::noops_token&) const
     {
       return always([] (TArgs...) -> void { });
     }
@@ -208,7 +208,7 @@ namespace spookshow
      * Enqueues a value which may be returned an infinite number of times.
      */
     template <typename T>
-    std::shared_ptr<functor_entry> always(const internal::returns_token<T>& token)
+    std::shared_ptr<functor_entry> always(const internal::returns_token<T>& token) const
     {
       return always([token] (TArgs...) -> T {
 	  return token.value();
@@ -218,7 +218,7 @@ namespace spookshow
     /**
      * Enqueues a functor which may be performed an infinite number of times.
      */
-    std::shared_ptr<functor_entry> always(const functor& functor)
+    std::shared_ptr<functor_entry> always(const functor& functor) const
     {
       return enqueue_functor(INFINITE, functor);
     }
@@ -234,7 +234,7 @@ namespace spookshow
      * @param count
      * The number of times this functor may be executed.
      */
-    std::shared_ptr<functor_entry> enqueue_functor(int count, const functor& functor)
+    std::shared_ptr<functor_entry> enqueue_functor(int count, const functor& functor) const
     {
       if (count < 1 && count != INFINITE)
 	internal::handle_error("Specified functor count was invalid!");

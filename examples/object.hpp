@@ -62,6 +62,14 @@ namespace spookshow
 	return num * 100;
       }
 
+      /**
+       * Const function taking no arguments and returning no value.
+       */
+      virtual void const_void_no_args() const
+      {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+      }
+
     };
 
   }

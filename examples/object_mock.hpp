@@ -26,6 +26,7 @@ namespace spookshow
       SPOOKSHOW_MAKE_MOCK_METHOD_1(void, void_one_arg, int);
       SPOOKSHOW_MAKE_MOCK_METHOD_0(int, int_no_args);
       SPOOKSHOW_MAKE_MOCK_METHOD_1(int, int_one_arg, int);
+      SPOOKSHOW_MAKE_CONST_MOCK_METHOD_0(void, const_void_no_args);
 
     };
 
