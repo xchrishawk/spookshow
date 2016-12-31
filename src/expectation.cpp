@@ -33,7 +33,7 @@ expectation::~expectation()
     return;
 
   std::ostringstream message;
-  message << "Unfulfilled expectation [" << name()
+  message << "Unfulfilled expectation! [" << name()
           << "] Expected " << m_required_count << " call" << (m_required_count == 1 ? "" : "s")
           << ", received " << m_count << " call" << (m_count == 1 ? "" : "s") << ".";
   internal::handle_failure(message.str());
@@ -48,7 +48,7 @@ void expectation::fulfill()
     else
     {
       std::ostringstream message;
-      message << "Expectation fulfilled out of order [" << name() << "].";
+      message << "Expectation fulfilled out of order! [" << name() << "]";
       internal::handle_failure(message.str());
     }
   }
