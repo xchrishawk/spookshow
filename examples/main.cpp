@@ -35,6 +35,7 @@ namespace
   void noops_demo();
   void returns_demo();
   void const_demo();
+  void skip_clear_demo();
 }
 
 /* -- Constants -- */
@@ -50,6 +51,7 @@ namespace
     { "noops",				noops_demo },
     { "returns",			returns_demo },
     { "const",				const_demo },
+    { "skip_clear",			skip_clear_demo },
   };
 }
 
@@ -343,6 +345,46 @@ namespace
       });
 
     mock.const_void_no_args();
+
+    std::cout << std::endl;
+  }
+
+  void skip_clear_demo()
+  {
+    std::cout << "-- Skip/Clear Demo --" << std::endl << std::endl;
+
+    examples::object_mock mock;
+
+    std::cout << "Queuing a functor with always(), and calling 3 times..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->always([] {
+        std::cout << "(From First Functor) This will repeat forever..." << std::endl;
+      });
+
+    mock.void_no_args();
+    mock.void_no_args();
+    mock.void_no_args();
+
+    std::cout << "Queing another functor with always(), and calling once..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->always([] {
+        std::cout << "(From Second Functor) This will repeat forever, but only after the first one is cleared" << std::endl;
+      });
+
+    mock.void_no_args();
+
+    std::cout << "Calling skip() to pop the first functor from the queue, and calling once..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->skip();
+
+    mock.void_no_args();
+
+    std::cout << "Queuing several more functors with once()..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+
+    std::cout << "Calling clear() to clear the queue, and calling once..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->clear();
+
+    mock.void_no_args();
 
     std::cout << std::endl;
   }

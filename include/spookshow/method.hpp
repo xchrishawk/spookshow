@@ -14,6 +14,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <spookshow/spookshow.hpp>
 
@@ -137,6 +138,28 @@ namespace spookshow
 	internal::handle_failure(message.str());
 	return TRet();
       }
+    }
+
+    /**
+     * Removes the functor at the front of the queue.
+     *
+     * This can be used (for example) to clear a functor which was enqueued with `repeats()` or
+     * `always()`, but which is no longer needed.
+     */
+    void skip() const
+    {
+      m_functor_queue.pop();
+    }
+
+    /**
+     * Clears all functors from the queue.
+     *
+     * This essentially resets the mock method to its initial state.
+     */
+    void clear() const
+    {
+      std::queue<std::shared_ptr<functor_entry>> empty;
+      std::swap(m_functor_queue, empty);
     }
 
     /**
