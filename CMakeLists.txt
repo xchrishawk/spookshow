@@ -11,15 +11,15 @@ set(CMAKE_CXX_DEBUG_FLAGS 	"-g")
 set(CMAKE_CXX_RELEASE_FLAGS	"-O2 -s -Werror")
 
 # working directories
-set(SRC_DIR 			${CMAKE_SOURCE_DIR}/src)
-set(INCLUDE_DIR 		${CMAKE_SOURCE_DIR}/include)
-set(TESTS_DIR			${CMAKE_SOURCE_DIR}/tests)
-set(EXAMPLES_DIR 		${CMAKE_SOURCE_DIR}/examples)
+set(SRC_DIR 			${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(INCLUDE_DIR 		${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(TESTS_DIR			${CMAKE_CURRENT_SOURCE_DIR}/tests)
+set(EXAMPLES_DIR 		${CMAKE_CURRENT_SOURCE_DIR}/examples)
 
 # target names
-set(LIBRARY_NAME 		${CMAKE_PROJECT_NAME})
-set(TESTS_NAME			tests)
-set(EXAMPLES_NAME 		examples)
+set(LIBRARY_NAME 		${PROJECT_NAME})
+set(TESTS_NAME			${PROJECT_NAME}_tests)
+set(EXAMPLES_NAME 		${PROJECT_NAME}_examples)
 
 # include directories
 include_directories(${INCLUDE_DIR})
@@ -68,6 +68,6 @@ target_link_libraries(${EXAMPLES_NAME}
 # Export library information to the parent scope, if there is one
 get_directory_property(HAS_PARENT PARENT_DIRECTORY)
 if(HAS_PARENT)
-  set(SPOOKSHOW_LIBRARY_NAME ${LIBRARY_NAME} PARENT_SCOPE)
-  set(SPOOKSHOW_INCLUDE_DIRS ${INCLUDE_DIR} PARENT_SCOPE)
+  set(SPOOKSHOW_LIBRARY ${LIBRARY_NAME} PARENT_SCOPE)
+  set(SPOOKSHOW_INCLUDE_DIR ${INCLUDE_DIR} PARENT_SCOPE)
 endif()
