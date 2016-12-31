@@ -43,6 +43,12 @@ protected:
 
 };
 
+// these are macros to preserve line number information in gtest failure report
+#define expect_not_failed()								        \
+  EXPECT_FALSE(m_failed) << "Expectation failed when it should not have failed!"
+#define expect_failed()										\
+  EXPECT_TRUE(m_failed) << "Expectation did not fail when it should have failed!"
+
 TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilled)
 {
   // for scope
@@ -50,7 +56,7 @@ TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilled)
     expectation exp("This should not fail");
     exp.fulfill();
   }
-  EXPECT_FALSE(m_failed) << "Expectation failed when it should not have failed!";
+  expect_not_failed();
 }
 
 TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilled)
@@ -59,7 +65,7 @@ TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilled)
   {
     expectation exp("This should fail");
   }
-  EXPECT_TRUE(m_failed) << "Expectation did not fail when it should have failed!";
+  expect_failed();
 }
 
 TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilledWithMultipleCalls)
@@ -71,7 +77,7 @@ TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilledWithMultipleCalls)
     exp.fulfill();
     exp.fulfill();
   }
-  EXPECT_FALSE(m_failed) << "Expectation failed when it should not have failed!";
+  expect_not_failed();
 }
 
 TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilledWithMultipleCalls)
@@ -82,7 +88,7 @@ TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilledWithMultipleCalls)
     exp.fulfill();
     exp.fulfill();
   }
-  EXPECT_TRUE(m_failed) << "Expectation did not fail when it should have failed!";
+  expect_failed();
 }
 
 TEST_F(ExpectationTest, ExpectationCanBeCalledMoreThanRequiredNumberOfTimes)
@@ -94,7 +100,7 @@ TEST_F(ExpectationTest, ExpectationCanBeCalledMoreThanRequiredNumberOfTimes)
     exp.fulfill();
     exp.fulfill();
   }
-  EXPECT_FALSE(m_failed) << "Expectation failed when it should not have failed!";
+  expect_not_failed();
 }
 
 TEST_F(ExpectationTest, ExpectationFailureMessageReportsExpectationName)
@@ -104,5 +110,6 @@ TEST_F(ExpectationTest, ExpectationFailureMessageReportsExpectationName)
   {
     expectation exp(EXPECTED_NAME);
   }
+  expect_failed();
   EXPECT_NE(m_fail_message.find(EXPECTED_NAME), std::string::npos);
 }
