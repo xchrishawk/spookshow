@@ -351,7 +351,7 @@ namespace spookshow
    * Creates an `internal::returns` token.
    */
   template <typename T>
-  inline internal::returns_token<T> returns(const T& value)
+  inline internal::returns_token<T> returns(T value)
   {
     return internal::returns_token<T>(value);
   }
