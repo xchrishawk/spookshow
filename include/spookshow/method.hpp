@@ -29,13 +29,13 @@ namespace spookshow
     /**
      * Token for enqueuing a no-op functor.
      */
-    class noops_token { };
+    class noops_token final { };
 
     /**
      * Token for returning a value.
      */
     template <typename T>
-    class returns_token
+    class returns_token final
     {
     public:
 
@@ -64,7 +64,7 @@ namespace spookshow
    * Object providing functionality for mocking a method.
    */
   template <typename TRet, typename... TArgs>
-  class method<TRet(TArgs...)>
+  class method<TRet(TArgs...)> final
   {
   private:
 
