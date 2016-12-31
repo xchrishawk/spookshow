@@ -11,9 +11,6 @@
 
 #include <functional>
 
-#include <spookshow/expectation.hpp>
-#include <spookshow/expectation_order.hpp>
-
 /* -- Types -- */
 
 namespace spookshow
@@ -50,3 +47,10 @@ namespace spookshow
   }
 
 }
+
+/* -- Library Includes -- */
+
+#include <spookshow/expectation.hpp>
+#include <spookshow/expectation_order.hpp>
+#include <spookshow/macros.hpp>
+#include <spookshow/method.hpp>

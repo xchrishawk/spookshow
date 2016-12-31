@@ -35,7 +35,7 @@ void spookshow::internal::handle_failure(const std::string& message)
   if (user_fail_handler)
     user_fail_handler(message);
   else
-    throw std::logic_error("Spookshow fail handler was not set!");
+    handle_error("Spookshow fail handler was not set!");
 }
 
 [[noreturn]] void spookshow::internal::handle_error(const std::string& message)

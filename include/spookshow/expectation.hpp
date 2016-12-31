@@ -42,7 +42,7 @@ namespace spookshow
      * @param name
      * The name of the expectation.
      */
-    expectation(const std::string& name)
+    explicit expectation(const std::string& name)
       : expectation(name, MINIMUM_REQUIRED_COUNT)
     { }
 
@@ -52,7 +52,7 @@ namespace spookshow
      * @param required_count
      * The number of times the requirement must be fulfilled.
      */
-    expectation(int required_count)
+    explicit expectation(int required_count)
       : expectation(std::string(), required_count)
     { }
 
