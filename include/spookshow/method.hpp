@@ -197,7 +197,7 @@ namespace spookshow
      *
      * This essentially resets the mock method to its initial state.
      */
-    void clear() const
+    void reset() const
     {
       std::queue<std::shared_ptr<functor_entry>> empty;
       std::swap(m_functor_queue, empty);

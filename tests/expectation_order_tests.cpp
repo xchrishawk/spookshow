@@ -21,7 +21,7 @@ using namespace testing;
 /**
  * Unit test for the `spookshow::expectation_order` class.
  */
-class ExpectationOrderTest : public Test
+class ExpectationOrderTests : public Test
 {
 protected:
 
@@ -50,12 +50,12 @@ protected:
 };
 
 // these are macros to preserve line number information in gtest failure report
-#define expect_not_failed()								        \
-  EXPECT_FALSE(m_failed) << "Expectation order failed when it should not have failed!"
-#define expect_failed()										\
-  EXPECT_TRUE(m_failed) << "Expectation order did not fail when it should have failed!"
+#define EXPECT_NOT_FAILED()								        \
+  EXPECT_FALSE(m_failed) << "Unexpected failure occurred!"
+#define EXPECT_FAILED()										\
+  EXPECT_TRUE(m_failed) << "Expected failure did not occur!"
 
-TEST_F(ExpectationOrderTest, DoesNotFailIfExpectationsCalledInOrder)
+TEST_F(ExpectationOrderTests, DoesNotFailIfExpectationsCalledInOrder)
 {
   expectation_order order;
 
@@ -67,10 +67,10 @@ TEST_F(ExpectationOrderTest, DoesNotFailIfExpectationsCalledInOrder)
   exp2.fulfill();
   exp3.fulfill();
 
-  expect_not_failed();
+  EXPECT_NOT_FAILED();
 }
 
-TEST_F(ExpectationOrderTest, FailsIfExpectationsCalledOutOfOrder)
+TEST_F(ExpectationOrderTests, FailsIfExpectationsCalledOutOfOrder)
 {
   // for scope
   expectation_order order;
@@ -80,13 +80,13 @@ TEST_F(ExpectationOrderTest, FailsIfExpectationsCalledOutOfOrder)
   expectation exp3;
 
   exp1.fulfill();
-  expect_not_failed();
+  EXPECT_NOT_FAILED();
 
   exp3.fulfill();
-  expect_failed();
+  EXPECT_FAILED();
 }
 
-TEST_F(ExpectationOrderTest, ExpectationOrderStackOperatesCorrectly)
+TEST_F(ExpectationOrderTests, ExpectationOrderStackOperatesCorrectly)
 {
   expectation_order outer_order;
 
@@ -95,7 +95,7 @@ TEST_F(ExpectationOrderTest, ExpectationOrderStackOperatesCorrectly)
   expectation outer_exp3;
 
   outer_exp1.fulfill();
-  expect_not_failed();
+  EXPECT_NOT_FAILED();
 
   // inner scope
   {
@@ -106,10 +106,10 @@ TEST_F(ExpectationOrderTest, ExpectationOrderStackOperatesCorrectly)
     expectation inner_exp3;
 
     inner_exp1.fulfill();
-    expect_not_failed();
+    EXPECT_NOT_FAILED();
 
     inner_exp3.fulfill();
-    expect_failed();
+    EXPECT_FAILED();
 
     inner_exp2.fulfill();
   }
@@ -117,5 +117,5 @@ TEST_F(ExpectationOrderTest, ExpectationOrderStackOperatesCorrectly)
   reset_failed();
 
   outer_exp3.fulfill();
-  expect_failed();
+  EXPECT_FAILED();
 }

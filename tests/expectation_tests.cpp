@@ -21,7 +21,7 @@ using namespace testing;
 /**
  * Unit test for the `spookshow::expectation` class.
  */
-class ExpectationTest : public Test
+class ExpectationTests : public Test
 {
 protected:
 
@@ -44,31 +44,31 @@ protected:
 };
 
 // these are macros to preserve line number information in gtest failure report
-#define expect_not_failed()								        \
-  EXPECT_FALSE(m_failed) << "Expectation failed when it should not have failed!"
-#define expect_failed()										\
-  EXPECT_TRUE(m_failed) << "Expectation did not fail when it should have failed!"
+#define EXPECT_NOT_FAILED()								        \
+  EXPECT_FALSE(m_failed) << "Unexpected failure occurred!"
+#define EXPECT_FAILED()										\
+  EXPECT_TRUE(m_failed) << "Expected failure did not occur!"
 
-TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilled)
+TEST_F(ExpectationTests, DoesNotFailWhenLeavingScopeIfFulfilled)
 {
   // for scope
   {
     expectation exp("This should not fail");
     exp.fulfill();
   }
-  expect_not_failed();
+  EXPECT_NOT_FAILED();
 }
 
-TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilled)
+TEST_F(ExpectationTests, FailsWhenLeavingScopeIfNotFulfilled)
 {
   // for scope
   {
     expectation exp("This should fail");
   }
-  expect_failed();
+  EXPECT_FAILED();
 }
 
-TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilledWithMultipleCalls)
+TEST_F(ExpectationTests, DoesNotFailWhenLeavingScopeIfFulfilledWithMultipleCalls)
 {
   // for scope
   {
@@ -77,10 +77,10 @@ TEST_F(ExpectationTest, DoesNotFailWhenLeavingScopeIfFulfilledWithMultipleCalls)
     exp.fulfill();
     exp.fulfill();
   }
-  expect_not_failed();
+  EXPECT_NOT_FAILED();
 }
 
-TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilledWithMultipleCalls)
+TEST_F(ExpectationTests, FailsWhenLeavingScopeIfNotFulfilledWithMultipleCalls)
 {
   // for scope
   {
@@ -88,10 +88,10 @@ TEST_F(ExpectationTest, FailsWhenLeavingScopeIfNotFulfilledWithMultipleCalls)
     exp.fulfill();
     exp.fulfill();
   }
-  expect_failed();
+  EXPECT_FAILED();
 }
 
-TEST_F(ExpectationTest, ExpectationCanBeCalledMoreThanRequiredNumberOfTimes)
+TEST_F(ExpectationTests, ExpectationCanBeCalledMoreThanRequiredNumberOfTimes)
 {
   // for scope
   {
@@ -100,16 +100,16 @@ TEST_F(ExpectationTest, ExpectationCanBeCalledMoreThanRequiredNumberOfTimes)
     exp.fulfill();
     exp.fulfill();
   }
-  expect_not_failed();
+  EXPECT_NOT_FAILED();
 }
 
-TEST_F(ExpectationTest, ExpectationFailureMessageReportsExpectationName)
+TEST_F(ExpectationTests, ExpectationFailureMessageReportsExpectationName)
 {
   static const std::string EXPECTED_NAME = "The Name";
   // for scope
   {
     expectation exp(EXPECTED_NAME);
   }
-  expect_failed();
+  EXPECT_FAILED();
   EXPECT_NE(m_fail_message.find(EXPECTED_NAME), std::string::npos);
 }

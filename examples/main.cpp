@@ -35,7 +35,7 @@ namespace
   void noops_demo();
   void returns_demo();
   void const_demo();
-  void skip_clear_demo();
+  void skip_reset_demo();
   void fulfills_demo();
 }
 
@@ -52,7 +52,7 @@ namespace
     { "noops",				noops_demo },
     { "returns",			returns_demo },
     { "const",				const_demo },
-    { "skip_clear",			skip_clear_demo },
+    { "skip_reset",			skip_reset_demo },
     { "fulfills",			fulfills_demo },
   };
 }
@@ -62,6 +62,12 @@ namespace
 int main(int argc, char** argv)
 {
   set_fail_handler(example_fail_handler);
+
+  if (argc <= 1)
+  {
+    print_help();
+    return 0;
+  }
 
   for (int arg = 1; arg < argc; arg++)
   {
@@ -351,9 +357,9 @@ namespace
     std::cout << std::endl;
   }
 
-  void skip_clear_demo()
+  void skip_reset_demo()
   {
-    std::cout << "-- Skip/Clear Demo --" << std::endl << std::endl;
+    std::cout << "-- Skip/Reset Demo --" << std::endl << std::endl;
 
     examples::object_mock mock;
 
@@ -383,8 +389,8 @@ namespace
     SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
     SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
 
-    std::cout << "Calling clear() to clear the queue, and calling once..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->clear();
+    std::cout << "Calling reset() to reset the queue, and calling once..." << std::endl;
+    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->reset();
 
     mock.void_no_args();
 

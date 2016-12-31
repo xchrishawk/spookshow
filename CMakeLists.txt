@@ -46,7 +46,8 @@ if (${GTEST_FOUND})
   add_executable(${TESTS_NAME} EXCLUDE_FROM_ALL
     ${TESTS_DIR}/main.cpp
     ${TESTS_DIR}/expectation_order_tests.cpp
-    ${TESTS_DIR}/expectation_tests.cpp)
+    ${TESTS_DIR}/expectation_tests.cpp
+    ${TESTS_DIR}/method_tests.cpp)
   target_link_libraries(${TESTS_NAME}
     ${LIBRARY_NAME}
     ${GTEST_BOTH_LIBRARIES}
