@@ -79,12 +79,12 @@ namespace spookshow
 
       friend class method<TRet(TArgs...)>;
 
-      int m_count;
       const functor m_functor;
+      int m_count;
 
-      functor_entry(int count, const functor& functor)
-	: m_count(count),
-	  m_functor(functor)
+      functor_entry(const functor& functor, int count)
+        : m_functor(functor),
+          m_count(count)
       { }
 
     };
@@ -116,7 +116,9 @@ namespace spookshow
     {
       if (!m_functor_queue.empty())
       {
+        // we have to cache the functor in case we delete the entry from the queue
 	const auto& entry = m_functor_queue.front();
+        functor functor_copy = entry->m_functor;
 
 	if (entry->m_count != INFINITE)
 	{
@@ -125,7 +127,7 @@ namespace spookshow
 	    m_functor_queue.pop();
 	}
 
-	return entry->m_functor(args...);
+	return functor_copy(args...);
       }
       else
       {
@@ -183,7 +185,7 @@ namespace spookshow
      */
     std::shared_ptr<functor_entry> once(const functor& functor) const
     {
-      return enqueue_functor(1, functor);
+      return enqueue_functor(functor, 1);
     }
 
     /**
@@ -211,7 +213,7 @@ namespace spookshow
      */
     std::shared_ptr<functor_entry> repeats(int count, const functor& functor) const
     {
-      return enqueue_functor(count, functor);
+      return enqueue_functor(functor, count);
     }
 
     /**
@@ -239,7 +241,7 @@ namespace spookshow
      */
     std::shared_ptr<functor_entry> always(const functor& functor) const
     {
-      return enqueue_functor(INFINITE, functor);
+      return enqueue_functor(functor, INFINITE);
     }
 
   private:
@@ -253,12 +255,12 @@ namespace spookshow
      * @param count
      * The number of times this functor may be executed.
      */
-    std::shared_ptr<functor_entry> enqueue_functor(int count, const functor& functor) const
+    std::shared_ptr<functor_entry> enqueue_functor(const functor& functor, int count) const
     {
       if (count < 1 && count != INFINITE)
 	internal::handle_error("Specified functor count was invalid!");
 
-      auto entry = std::shared_ptr<functor_entry>(new functor_entry(count, functor));
+      auto entry = std::shared_ptr<functor_entry>(new functor_entry(functor, count));
       m_functor_queue.push(entry);
       return entry;
     }

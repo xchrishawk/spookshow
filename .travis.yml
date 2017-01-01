@@ -20,4 +20,4 @@ before_install:
 script:
   - mkdir build
   - cd build
-  - cmake .. && make && make spookshow_examples && make spookshow_tests
+  - cmake .. && make && make spookshow_examples && make spookshow_tests && ./spookshow_tests
