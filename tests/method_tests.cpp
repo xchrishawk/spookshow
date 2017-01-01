@@ -6,6 +6,10 @@
 
 /* -- Includes -- */
 
+#include <cstdlib>
+#include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 #include <spookshow/spookshow.hpp>
 
@@ -16,27 +20,44 @@ using namespace testing;
 
 /* -- Object Definition -- */
 
-class object
+namespace
 {
-public:
-  virtual void void_no_args() { }
-  virtual void void_one_arg(int value) { }
-  virtual void void_two_args(int value1, int value2) { }
-  virtual int int_no_args() { return 0; }
-  virtual int int_one_arg(int value) { return 0; }
-  virtual int int_two_args(int value1, int value2) { return 0; }
-};
 
-class mock : public object
-{
-public:
-  SPOOKSHOW_MAKE_MOCK_METHOD_0(void, void_no_args);
-  SPOOKSHOW_MAKE_MOCK_METHOD_1(void, void_one_arg, int);
-  SPOOKSHOW_MAKE_MOCK_METHOD_2(void, void_two_args, int, int);
-  SPOOKSHOW_MAKE_MOCK_METHOD_0(int, int_no_args);
-  SPOOKSHOW_MAKE_MOCK_METHOD_1(int, int_one_arg, int);
-  SPOOKSHOW_MAKE_MOCK_METHOD_2(int, int_two_args, int, int);
-};
+  /**
+   * Sample object which will be mocked.
+   */
+  class object
+  {
+  public:
+    virtual void void_no_args() { }
+    virtual void void_one_arg(int value) { }
+    virtual void void_two_args(int value1, int value2) { }
+    virtual int int_no_args() { return 0; }
+    virtual int int_one_arg(int value) { return 0; }
+    virtual int int_two_args(int value1, int value2) { return 0; }
+    virtual char* returns_pointer() { return nullptr; }
+    virtual const char* returns_const_pointer() { return nullptr; }
+    virtual std::string returns_string() { return ""; }
+  };
+
+/**
+ * A mock object for the `object` class.
+ */
+  class mock : public object
+  {
+  public:
+    SPOOKSHOW_MAKE_MOCK_METHOD_0(void, void_no_args);
+    SPOOKSHOW_MAKE_MOCK_METHOD_1(void, void_one_arg, int);
+    SPOOKSHOW_MAKE_MOCK_METHOD_2(void, void_two_args, int, int);
+    SPOOKSHOW_MAKE_MOCK_METHOD_0(int, int_no_args);
+    SPOOKSHOW_MAKE_MOCK_METHOD_1(int, int_one_arg, int);
+    SPOOKSHOW_MAKE_MOCK_METHOD_2(int, int_two_args, int, int);
+    SPOOKSHOW_MAKE_MOCK_METHOD_0(char*, returns_pointer);
+    SPOOKSHOW_MAKE_MOCK_METHOD_0(const char*, returns_const_pointer);
+    SPOOKSHOW_MAKE_MOCK_METHOD_0(std::string, returns_string);
+  };
+
+}
 
 /* -- Test Cases -- */
 
@@ -206,9 +227,31 @@ TEST_F(MethodTests, NoopsDoesNothing)
 TEST_F(MethodTests, ReturnsReturnsValueType)
 {
   static const int EXPECTED_RETURN = 2000;
-
   SPOOKSHOW_MOCK_METHOD(m_mock, int_one_arg)->once(returns(EXPECTED_RETURN));
-
   EXPECT_EQ(m_mock.int_one_arg(-55), EXPECTED_RETURN);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ReturnsReturnsPointerType)
+{
+  char EXPECTED_RETURN[] = "test";
+  SPOOKSHOW_MOCK_METHOD(m_mock, returns_pointer)->once(returns(EXPECTED_RETURN));
+  EXPECT_EQ(m_mock.returns_pointer(), EXPECTED_RETURN);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ReturnsReturnsConstPointerType)
+{
+  static const char* EXPECTED_RETURN = "const string";
+  SPOOKSHOW_MOCK_METHOD(m_mock, returns_const_pointer)->once(returns(EXPECTED_RETURN));
+  EXPECT_EQ(m_mock.returns_const_pointer(), EXPECTED_RETURN);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ReturnsReturnsString)
+{
+  static const char* EXPECTED_RETURN = "should be converted to std::string implicitly";
+  SPOOKSHOW_MOCK_METHOD(m_mock, returns_string)->once(returns(EXPECTED_RETURN));
+  EXPECT_EQ(m_mock.returns_string(), EXPECTED_RETURN);
   EXPECT_NOT_FAILED();
 }

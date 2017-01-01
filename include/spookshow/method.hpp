@@ -39,7 +39,7 @@ namespace spookshow
     {
     public:
 
-      explicit returns_token(T value)
+      explicit returns_token(const T& value)
 	: m_value(value)
       { }
 
@@ -285,9 +285,20 @@ namespace spookshow
    * Creates an `internal::returns` token.
    */
   template <typename T>
-  inline internal::returns_token<T> returns(T value)
+  inline internal::returns_token<T> returns(const T& value)
   {
-    return internal::returns_token<T>(value);
+      return internal::returns_token<T>(value);
   }
+
+  /**
+   * Creates an `internal::returns` token.
+   *
+   * Required for array types, particularly string literals for strings returning `const char*`.
+   */
+   template <typename T>
+   inline internal::returns_token<T*> returns(T* value)
+   {
+     return internal::returns_token<T*>(value);
+   }
 
 }
