@@ -155,6 +155,15 @@ namespace spookshow
         return this;
       }
 
+      /**
+       * Adds an expectation to be fulfilled by a successful invocation of this method.
+       */
+      functor_entry* fulfills(expectation& expectation)
+      {
+        m_expectations.push_back(&expectation);
+        return this;
+      }
+
     private:
 
       friend class method<TRet(TArgs...)>;
@@ -162,11 +171,13 @@ namespace spookshow
       const functor m_functor;
       int m_count;
       std::vector<condition> m_conditions;
+      std::vector<expectation*> m_expectations;
 
       functor_entry(const functor& functor, int count)
         : m_functor(functor),
           m_count(count),
-          m_conditions()
+          m_conditions(),
+          m_expectations()
       { }
 
     };
@@ -212,6 +223,10 @@ namespace spookshow
 
         // we have to cache the functor in case we delete the entry from the queue
         functor functor_copy = entry->m_functor;
+
+        // fulfill all expectations for this call
+        for (const auto exp : entry->m_expectations)
+          exp->fulfill();
 
         // clear the entry from the queue if we're out of available calls
 	if (entry->m_count != INFINITE)

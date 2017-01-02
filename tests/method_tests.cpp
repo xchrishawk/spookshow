@@ -343,3 +343,66 @@ TEST_F(MethodTests, PointerArgCondition)
   m_mock.void_pointer_arg(EXPECTED_ARG);
   EXPECT_NOT_FAILED();
 }
+
+TEST_F(MethodTests, ExpectationFulfilledOnUnconditionalCall)
+{
+  expectation exp;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_no_args)->once(noops())->fulfills(exp);
+  m_mock.void_no_args();
+  EXPECT_TRUE(exp.is_fulfilled());
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectationFulfilledOnSuccessfulCall)
+{
+  static const int EXPECTED_ARG = 99999;
+  expectation exp;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires(arg_eq<0>(EXPECTED_ARG))->fulfills(exp);
+  m_mock.void_one_arg(EXPECTED_ARG);
+  EXPECT_TRUE(exp.is_fulfilled());
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectationNotFulfilledOnUnsuccessfulCall)
+{
+  static const int EXPECTED_ARG = -99999;
+  expectation exp;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires(arg_eq<0>(EXPECTED_ARG))->fulfills(exp);
+  m_mock.void_one_arg(EXPECTED_ARG + 1);
+  EXPECT_FALSE(exp.is_fulfilled());
+  EXPECT_FAILED();
+}
+
+TEST_F(MethodTests, MultipleExpectationsFulfilled)
+{
+  expectation exp1;
+  expectation exp2;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_no_args)->once(noops())->fulfills(exp1)->fulfills(exp2);
+  m_mock.void_no_args();
+  EXPECT_TRUE(exp1.is_fulfilled());
+  EXPECT_TRUE(exp2.is_fulfilled());
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, WorksWithSuccessfulExpectationOrder)
+{
+  expectation_order order;
+  expectation exp1;
+  expectation exp2;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_no_args)->once(noops())->fulfills(exp1);
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->fulfills(exp2);
+  m_mock.void_no_args();
+  m_mock.void_one_arg(0);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, WorksWithUnsuccessfulExpectationOrder)
+{
+  expectation_order order;
+  expectation exp1;
+  expectation exp2;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_no_args)->once(noops())->fulfills(exp1);
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->fulfills(exp2);
+  m_mock.void_one_arg(0);
+  EXPECT_FAILED();
+}
