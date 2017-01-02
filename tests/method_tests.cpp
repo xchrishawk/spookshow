@@ -32,6 +32,7 @@ namespace
     virtual void void_no_args() { }
     virtual void void_one_arg(int value) { }
     virtual void void_two_args(int value1, int value2) { }
+    virtual void void_pointer_arg(int* value) { }
     virtual int int_no_args() { return 0; }
     virtual int int_one_arg(int value) { return 0; }
     virtual int int_two_args(int value1, int value2) { return 0; }
@@ -49,6 +50,7 @@ namespace
     SPOOKSHOW_MAKE_MOCK_METHOD_0(void, void_no_args);
     SPOOKSHOW_MAKE_MOCK_METHOD_1(void, void_one_arg, int);
     SPOOKSHOW_MAKE_MOCK_METHOD_2(void, void_two_args, int, int);
+    SPOOKSHOW_MAKE_MOCK_METHOD_1(void, void_pointer_arg, int*);
     SPOOKSHOW_MAKE_MOCK_METHOD_0(int, int_no_args);
     SPOOKSHOW_MAKE_MOCK_METHOD_1(int, int_one_arg, int);
     SPOOKSHOW_MAKE_MOCK_METHOD_2(int, int_two_args, int, int);
@@ -253,5 +255,91 @@ TEST_F(MethodTests, ReturnsReturnsString)
   static const char* EXPECTED_RETURN = "should be converted to std::string implicitly";
   SPOOKSHOW_MOCK_METHOD(m_mock, returns_string)->once(returns(EXPECTED_RETURN));
   EXPECT_EQ(m_mock.returns_string(), EXPECTED_RETURN);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, FailsIfMethodCallsWithUnsuccessfulCondition)
+{
+  static const int EXPECTED_ARG = 100;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires([] (int arg) {
+      return (arg == EXPECTED_ARG);
+    });
+  m_mock.void_one_arg(EXPECTED_ARG + 1);
+  EXPECT_FAILED();
+}
+
+TEST_F(MethodTests, DoesNotFailIfMethodCalledWithSuccessfulCondition)
+{
+  static const int EXPECTED_ARG = 100;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires([] (int arg) {
+      return (arg == EXPECTED_ARG);
+    });
+  m_mock.void_one_arg(EXPECTED_ARG);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, FailsIfMethodCalledWithUnsuccessfulArgEqCondition)
+{
+  static const int EXPECTED_ARG = 900;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires(arg_eq<0>(EXPECTED_ARG));
+  m_mock.void_one_arg(EXPECTED_ARG + 1);
+  EXPECT_FAILED();
+}
+
+TEST_F(MethodTests, DoesNotFailIfMethodCalledWithSuccessfulArgEqCondition)
+{
+  static const int EXPECTED_ARG = 700;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires(arg_eq<0>(EXPECTED_ARG));
+  m_mock.void_one_arg(EXPECTED_ARG);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, FailsIfMethodCalledWithUnsuccessfulArgNeCondition)
+{
+  static const int EXPECTED_ARG = -900;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires(arg_ne<0>(EXPECTED_ARG));
+  m_mock.void_one_arg(EXPECTED_ARG);
+  EXPECT_FAILED();
+}
+
+TEST_F(MethodTests, DoesNotFailIfMethodCalledWithSuccessfulArgNeCondition)
+{
+  static const int EXPECTED_ARG = -700;
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_one_arg)->once(noops())->requires(arg_ne<0>(EXPECTED_ARG));
+  m_mock.void_one_arg(EXPECTED_ARG + 1);
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, FailsIfNotAllArgumentConditionsSuccessful)
+{
+  static const int EXPECTED_ARG_1 = 1;
+  static const int EXPECTED_ARG_2 = 2;
+
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_two_args)
+    ->always(noops())
+    ->requires(arg_eq<0>(EXPECTED_ARG_1))
+    ->requires(arg_ne<1>(EXPECTED_ARG_2));
+
+  // both successful
+  m_mock.void_two_args(EXPECTED_ARG_1, EXPECTED_ARG_2 + 1);
+  EXPECT_NOT_FAILED();
+  reset_failed();
+
+  // first unsuccessful
+  m_mock.void_two_args(EXPECTED_ARG_1 + 1, EXPECTED_ARG_2 + 1);
+  EXPECT_FAILED();
+  reset_failed();
+
+  // second unsuccessful
+  m_mock.void_two_args(EXPECTED_ARG_1, EXPECTED_ARG_2);
+  EXPECT_FAILED();
+  reset_failed();
+}
+
+TEST_F(MethodTests, PointerArgCondition)
+{
+  static int* EXPECTED_ARG = reinterpret_cast<int*>(200);
+  SPOOKSHOW_MOCK_METHOD(m_mock, void_pointer_arg)->once(noops())->requires(arg_eq<0>(EXPECTED_ARG));
+  m_mock.void_pointer_arg(EXPECTED_ARG);
   EXPECT_NOT_FAILED();
 }

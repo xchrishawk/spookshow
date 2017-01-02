@@ -53,6 +53,52 @@ namespace spookshow
       T m_value;
     };
 
+    /**
+     * Base class for tokens for setting a condition on an argument.
+     */
+    template <int index, typename T>
+    class arg_token
+    {
+    public:
+
+      explicit arg_token(const T& value)
+        : m_value(value)
+      { }
+
+      /** Returns the value. */
+      T value() const
+      {
+        return m_value;
+      }
+
+    private:
+      T m_value;
+    };
+
+    /**
+     * Token setting an "equal" condition on an argument.
+     */
+    template <int index, typename T>
+    class arg_eq_token final : public arg_token<index, T>
+    {
+    public:
+      explicit arg_eq_token(const T& value)
+        : arg_token<index, T>(value)
+      { }
+    };
+
+    /**
+     * Token setting a "not equal" condition on an argument.
+     */
+    template <int index, typename T>
+    class arg_ne_token final : public arg_token<index, T>
+    {
+    public:
+      explicit arg_ne_token(const T& value)
+        : arg_token<index, T>(value)
+      { }
+    };
+
   }
 
   template <typename TRet, typename... TArgs>
@@ -69,22 +115,58 @@ namespace spookshow
     static const int INFINITE = -1;
 
     typedef std::function<TRet(TArgs...)> functor;
+    typedef std::function<bool(TArgs...)> condition;
 
     /**
      * Class representing an entry in the functor queue.
      */
     class functor_entry
     {
+    public:
+
+      /**
+       * Requires that an argument be equal to a specific value.
+       */
+      template <int index, typename T>
+      functor_entry* requires(const internal::arg_eq_token<index, T>& token)
+      {
+        return requires([token] (TArgs... args) {
+            return (std::get<index>(std::tuple<TArgs...>(args...)) == token.value());
+          });
+      }
+
+      /**
+       * Requires that an argument be not equal to a specific value.
+       */
+      template <int index, typename T>
+      functor_entry* requires(const internal::arg_ne_token<index, T>& token)
+      {
+        return requires([token] (TArgs... args) {
+            return (std::get<index>(std::tuple<TArgs...>(args...)) != token.value());
+          });
+      }
+
+      /**
+       * Adds an arguments condition which must be met before this functor may be called.
+       */
+      functor_entry* requires(const condition& condition)
+      {
+        m_conditions.push_back(condition);
+        return this;
+      }
+
     private:
 
       friend class method<TRet(TArgs...)>;
 
       const functor m_functor;
       int m_count;
+      std::vector<condition> m_conditions;
 
       functor_entry(const functor& functor, int count)
         : m_functor(functor),
-          m_count(count)
+          m_count(count),
+          m_conditions()
       { }
 
     };
@@ -116,10 +198,22 @@ namespace spookshow
     {
       if (!m_functor_queue.empty())
       {
-        // we have to cache the functor in case we delete the entry from the queue
 	const auto& entry = m_functor_queue.front();
+
+        // check that any required argument conditions are met
+        for (const auto& condition : entry->m_conditions)
+          if (!condition(args...))
+            {
+              std::ostringstream message;
+              message << "Mock method call with incorrect arguments! [" << m_name << "].";
+              internal::handle_failure(message.str());
+              return TRet();
+            }
+
+        // we have to cache the functor in case we delete the entry from the queue
         functor functor_copy = entry->m_functor;
 
+        // clear the entry from the queue if we're out of available calls
 	if (entry->m_count != INFINITE)
 	{
 	  entry->m_count = std::max(entry->m_count - 1, 0);
@@ -276,7 +370,7 @@ namespace spookshow
 {
 
   /**
-   * Creates an `internal::noops` token.
+   * Creates an `internal::noops_token` token.
    */
   inline internal::noops_token noops()
   {
@@ -284,7 +378,7 @@ namespace spookshow
   }
 
   /**
-   * Creates an `internal::returns` token.
+   * Creates an `internal::returns_token` token.
    */
   template <typename T>
   inline internal::returns_token<T> returns(const T& value)
@@ -293,7 +387,7 @@ namespace spookshow
   }
 
   /**
-   * Creates an `internal::returns` token.
+   * Creates an `internal::returns_token` token.
    *
    * Required for array types, particularly string literals for strings returning `const char*`.
    */
@@ -302,5 +396,23 @@ namespace spookshow
    {
      return internal::returns_token<T*>(value);
    }
+
+  /**
+   * Creates an `internal::arg_eq_token` token.
+   */
+  template <int index, typename T>
+  inline internal::arg_eq_token<index, T> arg_eq(const T& value)
+  {
+    return internal::arg_eq_token<index, T>(value);
+  }
+
+  /**
+   * Creates an `internal::arg_ne_token` token.
+   */
+  template <int index, typename T>
+  inline internal::arg_ne_token<index, T> arg_ne(const T& value)
+  {
+    return internal::arg_ne_token<index, T>(value);
+  }
 
 }
