@@ -34,73 +34,28 @@ namespace spookshow
     /**
      * Token for returning a value.
      */
-    template <typename T>
+    template <typename TValue>
     class returns_token final
     {
     public:
 
-      explicit returns_token(const T& value)
+      explicit returns_token(const TValue& value)
 	: m_value(value)
       { }
 
       /** Returns the value. */
-      T value() const
+      TValue value() const
       {
 	return m_value;
       }
 
     private:
-      T m_value;
-    };
-
-    /**
-     * Base class for tokens for setting a condition on an argument.
-     */
-    template <int index, typename T>
-    class arg_token
-    {
-    public:
-
-      explicit arg_token(const T& value)
-        : m_value(value)
-      { }
-
-      /** Returns the value. */
-      T value() const
-      {
-        return m_value;
-      }
-
-    private:
-      T m_value;
-    };
-
-    /**
-     * Token setting an "equal" condition on an argument.
-     */
-    template <int index, typename T>
-    class arg_eq_token final : public arg_token<index, T>
-    {
-    public:
-      explicit arg_eq_token(const T& value)
-        : arg_token<index, T>(value)
-      { }
-    };
-
-    /**
-     * Token setting a "not equal" condition on an argument.
-     */
-    template <int index, typename T>
-    class arg_ne_token final : public arg_token<index, T>
-    {
-    public:
-      explicit arg_ne_token(const T& value)
-        : arg_token<index, T>(value)
-      { }
+      TValue m_value;
     };
 
   }
 
+  // required to use "function" syntax in class template
   template <typename TRet, typename... TArgs>
   class method;
 
@@ -114,8 +69,8 @@ namespace spookshow
 
     static const int INFINITE = -1;
 
-    typedef std::function<TRet(TArgs...)> functor;
-    typedef std::function<bool(TArgs...)> condition;
+    using functor = std::function<TRet(TArgs...)>;
+    using condition = std::function<bool(TArgs...)>;
 
     /**
      * Class representing an entry in the functor queue.
@@ -125,29 +80,7 @@ namespace spookshow
     public:
 
       /**
-       * Requires that an argument be equal to a specific value.
-       */
-      template <int index, typename T>
-      functor_entry* requires(const internal::arg_eq_token<index, T>& token)
-      {
-        return requires([token] (TArgs... args) {
-            return (std::get<index>(std::tuple<TArgs...>(args...)) == token.value());
-          });
-      }
-
-      /**
-       * Requires that an argument be not equal to a specific value.
-       */
-      template <int index, typename T>
-      functor_entry* requires(const internal::arg_ne_token<index, T>& token)
-      {
-        return requires([token] (TArgs... args) {
-            return (std::get<index>(std::tuple<TArgs...>(args...)) != token.value());
-          });
-      }
-
-      /**
-       * Adds an arguments condition which must be met before this functor may be called.
+       * Adds a condition which must be true before this method may be called.
        */
       functor_entry* requires(const condition& condition)
       {
@@ -211,18 +144,18 @@ namespace spookshow
       {
 	const auto& entry = m_functor_queue.front();
 
-        // check that any required argument conditions are met
-        for (const auto& condition : entry->m_conditions)
-          if (!condition(args...))
-            {
-              std::ostringstream message;
-              message << "Mock method call with incorrect arguments! [" << m_name << "].";
-              internal::handle_failure(message.str());
-              return TRet();
-            }
-
         // we have to cache the functor in case we delete the entry from the queue
         functor functor_copy = entry->m_functor;
+
+        // check conditions on this call
+        for (const auto& condition : entry->m_conditions)
+          if (!condition(args...))
+          {
+            std::ostringstream message;
+            message << "Mock method call with unexpected arguments! [" << m_name << "].";
+            spookshow::internal::handle_failure(message.str());
+            return TRet();
+          }
 
         // fulfill all expectations for this call
         for (const auto exp : entry->m_expectations)
@@ -242,7 +175,7 @@ namespace spookshow
       {
 	std::ostringstream message;
 	message << "Unexpected mock method call! [" << m_name << "].";
-	internal::handle_failure(message.str());
+	spookshow::internal::handle_failure(message.str());
 	return TRet();
       }
     }
@@ -272,8 +205,7 @@ namespace spookshow
     /**
      * Enqueues a no-op which may be performed once.
      */
-    template <typename... _>
-    std::shared_ptr<functor_entry> once(const internal::noops_token&) const
+    std::shared_ptr<functor_entry> once(const spookshow::internal::noops_token&) const
     {
       return once([] (TArgs...) -> void { });
     }
@@ -281,10 +213,10 @@ namespace spookshow
     /**
      * Enqueues a value which may be returned once.
      */
-    template <typename T>
-    std::shared_ptr<functor_entry> once(const internal::returns_token<T>& token) const
+    template <typename TValue>
+    std::shared_ptr<functor_entry> once(const spookshow::internal::returns_token<TValue>& token) const
     {
-      return once([token] (TArgs...) -> T {
+      return once([token] (TArgs...) -> TValue {
 	  return token.value();
 	});
     }
@@ -300,8 +232,7 @@ namespace spookshow
     /**
      * Enqueues a no-op which may be performed a finite number of times.
      */
-    template <typename... _>
-    std::shared_ptr<functor_entry> repeats(int count, const internal::noops_token&) const
+    std::shared_ptr<functor_entry> repeats(int count, const spookshow::internal::noops_token&) const
     {
       return repeats(count, [] (TArgs...) -> void { });
     }
@@ -309,10 +240,10 @@ namespace spookshow
     /**
      * Enqueues a value which may be returned a finite number of times.
      */
-    template <typename T>
-    std::shared_ptr<functor_entry> repeats(int count, const internal::returns_token<T>& token) const
+    template <typename TValue>
+    std::shared_ptr<functor_entry> repeats(int count, const spookshow::internal::returns_token<TValue>& token) const
     {
-      return repeats(count, [token] (TArgs...) -> T {
+      return repeats(count, [token] (TArgs...) -> TValue {
 	  return token.value();
 	});
     }
@@ -328,8 +259,7 @@ namespace spookshow
     /**
      * Enqueues a no-op which may be performed an infinite number of times.
      */
-    template <typename... _>
-    std::shared_ptr<functor_entry> always(const internal::noops_token&) const
+    std::shared_ptr<functor_entry> always(const spookshow::internal::noops_token&) const
     {
       return always([] (TArgs...) -> void { });
     }
@@ -337,10 +267,10 @@ namespace spookshow
     /**
      * Enqueues a value which may be returned an infinite number of times.
      */
-    template <typename T>
-    std::shared_ptr<functor_entry> always(const internal::returns_token<T>& token) const
+    template <typename TValue>
+    std::shared_ptr<functor_entry> always(const spookshow::internal::returns_token<TValue>& token) const
     {
-      return always([token] (TArgs...) -> T {
+      return always([token] (TArgs...) -> TValue {
 	  return token.value();
 	});
     }
@@ -367,7 +297,7 @@ namespace spookshow
     std::shared_ptr<functor_entry> enqueue_functor(const functor& functor, int count) const
     {
       if (count < 1 && count != INFINITE)
-	internal::handle_error("Specified functor count was invalid!");
+	spookshow::internal::handle_error("Specified functor count was invalid!");
 
       auto entry = std::shared_ptr<functor_entry>(new functor_entry(functor, count));
       m_functor_queue.push(entry);
@@ -385,49 +315,32 @@ namespace spookshow
 {
 
   /**
-   * Creates an `internal::noops_token` token.
+   * Creates a token indicating that a method call should do nothing.
    */
-  inline internal::noops_token noops()
+  inline spookshow::internal::noops_token noops()
   {
-    return internal::noops_token();
+    return spookshow::internal::noops_token();
   }
 
   /**
-   * Creates an `internal::returns_token` token.
+   * Creates a token indicating that a method call should return a specific value.
    */
-  template <typename T>
-  inline internal::returns_token<T> returns(const T& value)
+  template <typename TValue>
+  inline spookshow::internal::returns_token<TValue> returns(const TValue& value)
   {
-      return internal::returns_token<T>(value);
+      return spookshow::internal::returns_token<TValue>(value);
   }
 
   /**
-   * Creates an `internal::returns_token` token.
+   * Creates a token indicating that a method call should return a specific value.
    *
-   * Required for array types, particularly string literals for strings returning `const char*`.
+   * @note
+   * This overload is required for array types, particularly string literals for strings returning `const char*`.
    */
-   template <typename T>
-   inline internal::returns_token<T*> returns(T* value)
-   {
-     return internal::returns_token<T*>(value);
-   }
-
-  /**
-   * Creates an `internal::arg_eq_token` token.
-   */
-  template <int index, typename T>
-  inline internal::arg_eq_token<index, T> arg_eq(const T& value)
+  template <typename TValue>
+  inline spookshow::internal::returns_token<TValue*> returns(TValue* value)
   {
-    return internal::arg_eq_token<index, T>(value);
-  }
-
-  /**
-   * Creates an `internal::arg_ne_token` token.
-   */
-  template <int index, typename T>
-  inline internal::arg_ne_token<index, T> arg_ne(const T& value)
-  {
-    return internal::arg_ne_token<index, T>(value);
+    return spookshow::internal::returns_token<TValue*>(value);
   }
 
 }

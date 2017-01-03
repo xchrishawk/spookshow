@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8.7)
 project(spookshow)
 
 # toolchain flags
-set(CMAKE_CXX_FLAGS 		"-std=gnu++11 -Wall -Wpedantic")
+set(CMAKE_CXX_FLAGS 		"-std=gnu++14 -Wall -Wpedantic")
 set(CMAKE_CXX_DEBUG_FLAGS 	"-g")
 set(CMAKE_CXX_RELEASE_FLAGS	"-O2 -s -Werror")
 
@@ -45,6 +45,7 @@ if (${GTEST_FOUND})
 
   add_executable(${TESTS_NAME} EXCLUDE_FROM_ALL
     ${TESTS_DIR}/main.cpp
+    ${TESTS_DIR}/condition_tests.cpp
     ${TESTS_DIR}/expectation_order_tests.cpp
     ${TESTS_DIR}/expectation_tests.cpp
     ${TESTS_DIR}/method_tests.cpp)

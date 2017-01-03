@@ -50,6 +50,7 @@ namespace spookshow
 
 /* -- Library Includes -- */
 
+#include <spookshow/condition.hpp>
 #include <spookshow/expectation.hpp>
 #include <spookshow/expectation_order.hpp>
 #include <spookshow/macros.hpp>
