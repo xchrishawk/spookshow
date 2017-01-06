@@ -56,13 +56,15 @@ if (${GTEST_FOUND})
 
   add_test(all ${TESTS_NAME})
 
-endif()
+  # examples executable
+  add_executable(${EXAMPLES_NAME} EXCLUDE_FROM_ALL
+    ${EXAMPLES_DIR}/main.cpp)
+  target_link_libraries(${EXAMPLES_NAME}
+    ${LIBRARY_NAME}
+    ${GTEST_BOTH_LIBRARIES}
+    pthread)
 
-# examples executable
-add_executable(${EXAMPLES_NAME} EXCLUDE_FROM_ALL
-  ${EXAMPLES_DIR}/main.cpp)
-target_link_libraries(${EXAMPLES_NAME}
-  ${LIBRARY_NAME})
+endif()
 
 # -- Exports --
 
