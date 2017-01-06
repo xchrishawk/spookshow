@@ -236,7 +236,7 @@ namespace
     examples::object_mock mock;
 
     std::cout << "Enqueuing functor with once(), then calling twice..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once([] {
+    SPOOKSHOW(mock, void_no_args)->once([] {
 	std::cout << "(From Functor) This can only be performed once." << std::endl;
       });
 
@@ -244,7 +244,7 @@ namespace
     mock.void_no_args();
 
     std::cout << std::endl << "Enqueuing functor with repeats(2), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->repeats(2, [] {
+    SPOOKSHOW(mock, void_no_args)->repeats(2, [] {
 	std::cout << "(From Functor) This can be called 2 times." << std::endl;
       });
 
@@ -253,7 +253,7 @@ namespace
     mock.void_no_args();
 
     std::cout << std::endl << "Enqueuing functor with always(), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->always([] {
+    SPOOKSHOW(mock, void_no_args)->always([] {
 	std::cout << "(From Functor) This can be called an infinite number of times." << std::endl;
       });
 
@@ -262,7 +262,7 @@ namespace
     mock.void_no_args();
 
     std::cout << std::endl << "Enqueuing functor calculating factorial, then calling with 10..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, int_one_arg)->always([] (int value) {
+    SPOOKSHOW(mock, int_one_arg)->always([] (int value) {
 	std::cout << "(From Functor) Hello from the factorial lambda!" << std::endl;
 	int fact = 1;
 	while (value > 1)
@@ -282,27 +282,27 @@ namespace
     examples::object_mock mock;
 
     std::cout << "Enqueuing noops with once(), then calling twice..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+    SPOOKSHOW(mock, void_no_args)->once(noops());
 
     mock.void_no_args();
     mock.void_no_args();
 
     std::cout << "Enqueuing noops with repeats(2), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_one_arg)->repeats(2, noops());
+    SPOOKSHOW(mock, void_one_arg)->repeats(2, noops());
 
     mock.void_one_arg(15);
     mock.void_one_arg(20);
     mock.void_one_arg(25);
 
     std::cout << "Enqueuing noops with always(), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_one_arg)->always(noops());
+    SPOOKSHOW(mock, void_one_arg)->always(noops());
 
     mock.void_one_arg(15);
     mock.void_one_arg(20);
     mock.void_one_arg(25);
 
     // this would fail to compile, becase the functor type must return a value
-    // SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+    // SPOOKSHOW(mock, void_no_args)->once(noops());
 
     std::cout << std::endl;
   }
@@ -314,27 +314,27 @@ namespace
     examples::object_mock mock;
 
     std::cout << "Enqueuing returns(1) with once(), then calling twice..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, int_no_args)->once(returns(1));
+    SPOOKSHOW(mock, int_no_args)->once(returns(1));
 
     std::cout << "Returned: " << mock.int_no_args() << std::endl;
     std::cout << "Returned: " << mock.int_no_args() << std::endl;
 
     std::cout << "Enqueuing returns(2) with repeats(2), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, int_one_arg)->repeats(2, returns(2));
+    SPOOKSHOW(mock, int_one_arg)->repeats(2, returns(2));
 
     std::cout << "Returned: " << mock.int_one_arg(5) << std::endl;
     std::cout << "Returned: " << mock.int_one_arg(10) << std::endl;
     std::cout << "Returned: " << mock.int_one_arg(15) << std::endl;
 
     std::cout << "Enqueuing returns(3) with always(), then calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, int_one_arg)->always(returns(3));
+    SPOOKSHOW(mock, int_one_arg)->always(returns(3));
 
     std::cout << "Returned: " << mock.int_one_arg(5) << std::endl;
     std::cout << "Returned: " << mock.int_one_arg(10) << std::endl;
     std::cout << "Returned: " << mock.int_one_arg(15) << std::endl;
 
     // this would fail to compile, because the functor type must return a value
-    // SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(returns());
+    // SPOOKSHOW(mock, void_no_args)->once(returns());
 
     std::cout << std::endl;
   }
@@ -346,7 +346,7 @@ namespace
     const examples::object_mock mock;
 
     std::cout << "Mock object is const, but we can still mock methods with a different macro:" << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, const_void_no_args)->once([] {
+    SPOOKSHOW(mock, const_void_no_args)->once([] {
         std::cout << "(From Functor) Hello from a mocked const method!" << std::endl;
       });
 
@@ -362,7 +362,7 @@ namespace
     examples::object_mock mock;
 
     std::cout << "Queuing a functor with always(), and calling 3 times..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->always([] {
+    SPOOKSHOW(mock, void_no_args)->always([] {
         std::cout << "(From First Functor) This will repeat forever..." << std::endl;
       });
 
@@ -371,24 +371,24 @@ namespace
     mock.void_no_args();
 
     std::cout << "Queing another functor with always(), and calling once..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->always([] {
+    SPOOKSHOW(mock, void_no_args)->always([] {
         std::cout << "(From Second Functor) This will repeat forever, but only after the first one is cleared" << std::endl;
       });
 
     mock.void_no_args();
 
     std::cout << "Calling skip() to pop the first functor from the queue, and calling once..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->skip();
+    SPOOKSHOW(mock, void_no_args)->skip();
 
     mock.void_no_args();
 
     std::cout << "Queuing several more functors with once()..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->once(noops());
+    SPOOKSHOW(mock, void_no_args)->once(noops());
+    SPOOKSHOW(mock, void_no_args)->once(noops());
+    SPOOKSHOW(mock, void_no_args)->once(noops());
 
     std::cout << "Calling reset() to reset the queue, and calling once..." << std::endl;
-    SPOOKSHOW_MOCK_METHOD(mock, void_no_args)->reset();
+    SPOOKSHOW(mock, void_no_args)->reset();
 
     mock.void_no_args();
 

@@ -24,12 +24,12 @@ namespace spookshow
 
       // These macros are defined in <spookshow/macros.h>.
       // - They override the corresponding method in the superclass.
-      // - They create mock method objects which may be accessed with SPOOKSHOW_MOCK_METHOD().
-      SPOOKSHOW_MAKE_MOCK_METHOD_0(void, void_no_args);
-      SPOOKSHOW_MAKE_MOCK_METHOD_1(void, void_one_arg, int);
-      SPOOKSHOW_MAKE_MOCK_METHOD_0(int, int_no_args);
-      SPOOKSHOW_MAKE_MOCK_METHOD_1(int, int_one_arg, int);
-      SPOOKSHOW_MAKE_CONST_MOCK_METHOD_0(void, const_void_no_args);
+      // - They create mock method objects which may be accessed with the SPOOKSHOW() macro.
+      SPOOKSHOW_MOCK_METHOD_0(void, void_no_args);
+      SPOOKSHOW_MOCK_METHOD_1(void, void_one_arg, int);
+      SPOOKSHOW_MOCK_METHOD_0(int, int_no_args);
+      SPOOKSHOW_MOCK_METHOD_1(int, int_one_arg, int);
+      SPOOKSHOW_MOCK_CONST_METHOD_0(void, const_void_no_args);
 
     };
 
