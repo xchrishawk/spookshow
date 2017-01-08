@@ -69,7 +69,7 @@ protected:
 
 TEST_F(MethodTests, DoesNotFailIfExpectedMethodIsCalled)
 {
-  SPOOKSHOW(m_mock, void_no_args)->once(noops());
+  SPOOKSHOW(m_mock, void_no_args).once(noops());
   m_mock.void_no_args();
   EXPECT_NOT_FAILED();
 }
@@ -82,7 +82,7 @@ TEST_F(MethodTests, FailsIfUnexpectedMethodIsCalled)
 
 TEST_F(MethodTests, OnceQueuesFunctorOnce)
 {
-  SPOOKSHOW(m_mock, void_no_args)->once(noops());
+  SPOOKSHOW(m_mock, void_no_args).once(noops());
 
   m_mock.void_no_args();
   EXPECT_NOT_FAILED();
@@ -94,7 +94,7 @@ TEST_F(MethodTests, OnceQueuesFunctorOnce)
 TEST_F(MethodTests, RepeatsQueuesFunctorMultipleTimes)
 {
   static const int COUNT = 5;
-  SPOOKSHOW(m_mock, void_no_args)->repeats(COUNT, noops());
+  SPOOKSHOW(m_mock, void_no_args).repeats(COUNT, noops());
 
   for (int idx = 0; idx < COUNT; idx++)
     m_mock.void_no_args();
@@ -106,7 +106,7 @@ TEST_F(MethodTests, RepeatsQueuesFunctorMultipleTimes)
 
 TEST_F(MethodTests, AlwaysQueuesFunctorInfiniteTimes)
 {
-  SPOOKSHOW(m_mock, void_no_args)->always(noops());
+  SPOOKSHOW(m_mock, void_no_args).always(noops());
 
   for (int idx = 0; idx < 1000; idx++)
     m_mock.void_no_args();
@@ -127,13 +127,13 @@ TEST_F(MethodTests, FunctorsAreExecutedInOrderTheyAreQueued)
   int times_repeats_called = 0;
   int times_always_called = 0;
 
-  SPOOKSHOW(m_mock, void_no_args)->once([&] {
+  SPOOKSHOW(m_mock, void_no_args).once([&] {
       ++times_once_called;
     });
-  SPOOKSHOW(m_mock, void_no_args)->repeats(EXPECTED_TIMES_REPEATS_CALLED, [&] {
+  SPOOKSHOW(m_mock, void_no_args).repeats(EXPECTED_TIMES_REPEATS_CALLED, [&] {
       ++times_repeats_called;
     });
-  SPOOKSHOW(m_mock, void_no_args)->always([&] {
+  SPOOKSHOW(m_mock, void_no_args).always([&] {
       ++times_always_called;
     });
 
@@ -149,8 +149,8 @@ TEST_F(MethodTests, SkipRemovesNextFunctorInQueue)
 {
   bool once_called = false;
 
-  SPOOKSHOW(m_mock, void_no_args)->always(noops());
-  SPOOKSHOW(m_mock, void_no_args)->once([&] {
+  SPOOKSHOW(m_mock, void_no_args).always(noops());
+  SPOOKSHOW(m_mock, void_no_args).once([&] {
       once_called = true;
     });
 
@@ -159,7 +159,7 @@ TEST_F(MethodTests, SkipRemovesNextFunctorInQueue)
   EXPECT_NOT_FAILED();
   EXPECT_FALSE(once_called);
 
-  SPOOKSHOW(m_mock, void_no_args)->skip();
+  SPOOKSHOW(m_mock, void_no_args).skip();
 
   m_mock.void_no_args();
   EXPECT_NOT_FAILED();
@@ -171,14 +171,14 @@ TEST_F(MethodTests, SkipRemovesNextFunctorInQueue)
 
 TEST_F(MethodTests, ResetRemovesAllFunctorsInQueue)
 {
-  SPOOKSHOW(m_mock, void_no_args)->always(noops());
-  SPOOKSHOW(m_mock, void_no_args)->always(noops());
-  SPOOKSHOW(m_mock, void_no_args)->always(noops());
+  SPOOKSHOW(m_mock, void_no_args).always(noops());
+  SPOOKSHOW(m_mock, void_no_args).always(noops());
+  SPOOKSHOW(m_mock, void_no_args).always(noops());
 
   m_mock.void_no_args();
   EXPECT_NOT_FAILED();
 
-  SPOOKSHOW(m_mock, void_no_args)->reset();
+  SPOOKSHOW(m_mock, void_no_args).reset();
 
   m_mock.void_no_args();
   EXPECT_FAILED();
@@ -187,7 +187,7 @@ TEST_F(MethodTests, ResetRemovesAllFunctorsInQueue)
 
 TEST_F(MethodTests, NoopsDoesNothing)
 {
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops());
+  SPOOKSHOW(m_mock, void_one_arg).once(noops());
   m_mock.void_one_arg(15);
   EXPECT_NOT_FAILED();
 }
@@ -195,7 +195,7 @@ TEST_F(MethodTests, NoopsDoesNothing)
 TEST_F(MethodTests, ReturnsReturnsValueType)
 {
   static const int EXPECTED_RETURN = 2000;
-  SPOOKSHOW(m_mock, int_one_arg)->once(returns(EXPECTED_RETURN));
+  SPOOKSHOW(m_mock, int_one_arg).once(returns(EXPECTED_RETURN));
   EXPECT_EQ(m_mock.int_one_arg(-55), EXPECTED_RETURN);
   EXPECT_NOT_FAILED();
 }
@@ -203,7 +203,7 @@ TEST_F(MethodTests, ReturnsReturnsValueType)
 TEST_F(MethodTests, ReturnsReturnsPointerType)
 {
   char EXPECTED_RETURN[] = "test";
-  SPOOKSHOW(m_mock, returns_pointer)->once(returns(EXPECTED_RETURN));
+  SPOOKSHOW(m_mock, returns_pointer).once(returns(EXPECTED_RETURN));
   EXPECT_EQ(m_mock.returns_pointer(), EXPECTED_RETURN);
   EXPECT_NOT_FAILED();
 }
@@ -211,7 +211,7 @@ TEST_F(MethodTests, ReturnsReturnsPointerType)
 TEST_F(MethodTests, ReturnsReturnsConstPointerType)
 {
   static const char* EXPECTED_RETURN = "const string";
-  SPOOKSHOW(m_mock, returns_const_pointer)->once(returns(EXPECTED_RETURN));
+  SPOOKSHOW(m_mock, returns_const_pointer).once(returns(EXPECTED_RETURN));
   EXPECT_EQ(m_mock.returns_const_pointer(), EXPECTED_RETURN);
   EXPECT_NOT_FAILED();
 }
@@ -219,7 +219,7 @@ TEST_F(MethodTests, ReturnsReturnsConstPointerType)
 TEST_F(MethodTests, ReturnsReturnsString)
 {
   static const char* EXPECTED_RETURN = "should be converted to std::string implicitly";
-  SPOOKSHOW(m_mock, returns_string)->once(returns(EXPECTED_RETURN));
+  SPOOKSHOW(m_mock, returns_string).once(returns(EXPECTED_RETURN));
   EXPECT_EQ(m_mock.returns_string(), EXPECTED_RETURN);
   EXPECT_NOT_FAILED();
 }
@@ -227,7 +227,7 @@ TEST_F(MethodTests, ReturnsReturnsString)
 TEST_F(MethodTests, DoesNotFailWithSuccessfulCondition)
 {
   static const int EXPECTED_ARG = -100;
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops())->requires([] (int arg) {
+  SPOOKSHOW(m_mock, void_one_arg).once(noops()).requires([] (int arg) {
       return (arg == EXPECTED_ARG);
     });
   m_mock.void_one_arg(EXPECTED_ARG);
@@ -237,7 +237,7 @@ TEST_F(MethodTests, DoesNotFailWithSuccessfulCondition)
 TEST_F(MethodTests, FailsWithUnsuccessfulCondition)
 {
   static const int EXPECTED_ARG = -4000;
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops())->requires([] (int arg) {
+  SPOOKSHOW(m_mock, void_one_arg).once(noops()).requires([] (int arg) {
       return (arg == EXPECTED_ARG);
     });
   m_mock.void_one_arg(EXPECTED_ARG + 1);
@@ -247,7 +247,7 @@ TEST_F(MethodTests, FailsWithUnsuccessfulCondition)
 TEST_F(MethodTests, ExpectationFulfilledOnCallWithNoConditions)
 {
   expectation exp;
-  SPOOKSHOW(m_mock, void_no_args)->once(noops())->fulfills(exp);
+  SPOOKSHOW(m_mock, void_no_args).once(noops()).fulfills(exp);
   m_mock.void_no_args();
   EXPECT_TRUE(exp.is_fulfilled());
   EXPECT_NOT_FAILED();
@@ -257,7 +257,7 @@ TEST_F(MethodTests, ExpectationFulfilledOnCallWithSuccessfulCondition)
 {
   static const int EXPECTED_ARG = 100;
   expectation exp;
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops())->fulfills(exp)->requires([] (int arg) {
+  SPOOKSHOW(m_mock, void_one_arg).once(noops()).fulfills(exp).requires([] (int arg) {
       return (arg == EXPECTED_ARG);
     });
   m_mock.void_one_arg(EXPECTED_ARG);
@@ -269,7 +269,7 @@ TEST_F(MethodTests, ExpectationNotFulfilledOnCallWithUnsuccessfulCondition)
 {
   static const int EXPECTED_ARG = 200;
   expectation exp;
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops())->fulfills(exp)->requires([] (int arg) {
+  SPOOKSHOW(m_mock, void_one_arg).once(noops()).fulfills(exp).requires([] (int arg) {
       return (arg == EXPECTED_ARG);
     });
   m_mock.void_one_arg(EXPECTED_ARG + 1);
@@ -281,7 +281,7 @@ TEST_F(MethodTests, MultipleExpectationsCanBeFulfilledWithOneCall)
 {
   expectation exp1;
   expectation exp2;
-  SPOOKSHOW(m_mock, void_no_args)->once(noops())->fulfills(exp1)->fulfills(exp2);
+  SPOOKSHOW(m_mock, void_no_args).once(noops()).fulfills(exp1).fulfills(exp2);
   m_mock.void_no_args();
   EXPECT_TRUE(exp1.is_fulfilled());
   EXPECT_TRUE(exp2.is_fulfilled());
@@ -293,8 +293,8 @@ TEST_F(MethodTests, ExpectationOrderDoesNotFailWhenMethodsCalledInExpectedOrder)
   expectation_order order;
   expectation exp1;
   expectation exp2;
-  SPOOKSHOW(m_mock, void_no_args)->once(noops())->fulfills(exp1);
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops())->fulfills(exp2);
+  SPOOKSHOW(m_mock, void_no_args).once(noops()).fulfills(exp1);
+  SPOOKSHOW(m_mock, void_one_arg).once(noops()).fulfills(exp2);
   m_mock.void_no_args();
   m_mock.void_one_arg(0);
   EXPECT_NOT_FAILED();
@@ -305,8 +305,8 @@ TEST_F(MethodTests, ExpectationOrderFailsWhenMethodsCalledOutOfExpectedOrder)
   expectation_order order;
   expectation exp1;
   expectation exp2;
-  SPOOKSHOW(m_mock, void_no_args)->once(noops())->fulfills(exp1);
-  SPOOKSHOW(m_mock, void_one_arg)->once(noops())->fulfills(exp2);
+  SPOOKSHOW(m_mock, void_no_args).once(noops()).fulfills(exp1);
+  SPOOKSHOW(m_mock, void_one_arg).once(noops()).fulfills(exp2);
   m_mock.void_one_arg(0);
   EXPECT_FAILED();
 }
@@ -316,8 +316,8 @@ TEST_F(MethodTests, DoesNotFailWithSuccessfulConditionFunctorObject)
   static const int EXPECTED_ARG_1 = 100;
   static const int EXPECTED_ARG_2 = 200;
   SPOOKSHOW(m_mock, void_two_args)
-    ->once(noops())
-    ->requires(arg_eq<0>(EXPECTED_ARG_1) && arg_ne<1>(EXPECTED_ARG_2));
+    .once(noops())
+    .requires(arg_eq<0>(EXPECTED_ARG_1) && arg_ne<1>(EXPECTED_ARG_2));
   m_mock.void_two_args(EXPECTED_ARG_1, EXPECTED_ARG_2 + 1);
   EXPECT_NOT_FAILED();
 }
@@ -327,8 +327,8 @@ TEST_F(MethodTests, FailsWithUnsuccessfulConditionFunctorObject)
   static const int EXPECTED_ARG_1 = 100;
   static const int EXPECTED_ARG_2 = 200;
   SPOOKSHOW(m_mock, void_two_args)
-    ->once(noops())
-    ->requires(arg_eq<0>(EXPECTED_ARG_1) && arg_ne<1>(EXPECTED_ARG_2));
+    .once(noops())
+    .requires(arg_eq<0>(EXPECTED_ARG_1) && arg_ne<1>(EXPECTED_ARG_2));
   m_mock.void_two_args(EXPECTED_ARG_1, EXPECTED_ARG_2);
   EXPECT_FAILED();
 }

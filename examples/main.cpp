@@ -158,12 +158,12 @@ TEST_F(PilotTest, TakeOffAirplane)
 
   // Now set up our mocks.
   SPOOKSHOW(m_airplane, set_gear_extended)
-    ->once(noops())
-    ->requires(arg_eq<0>(false))
-    ->fulfills(gear_retracted);
+    .once(noops())
+    .requires(arg_eq<0>(false))
+    .fulfills(gear_retracted);
   SPOOKSHOW(m_airplane, takeoff)
-    ->once(noops())
-    ->fulfills(took_off);
+    .once(noops())
+    .fulfills(took_off);
 
   // Run the test.
   m_pilot.takeoff_airplane(m_airplane);
@@ -178,12 +178,12 @@ TEST_F(PilotTest, LandAirplane)
   expectation landed("land() called");
 
   SPOOKSHOW(m_airplane, set_gear_extended)
-    ->once(noops())
-    ->requires(arg_eq<0>(true))
-    ->fulfills(gear_extended);
+    .once(noops())
+    .requires(arg_eq<0>(true))
+    .fulfills(gear_extended);
   SPOOKSHOW(m_airplane, land)
-    ->once(noops())
-    ->fulfills(landed);
+    .once(noops())
+    .fulfills(landed);
 
   m_pilot.land_airplane(m_airplane);
 }
@@ -195,6 +195,6 @@ TEST_F(PilotTest, ReportAirspeed)
   static const double EXPECTED_AIRSPEED = 200.0;
 
   // Set up the method, then verify the `pilot` object returns the correct value.
-  SPOOKSHOW(m_airplane, get_airspeed)->once(returns(EXPECTED_AIRSPEED));
+  SPOOKSHOW(m_airplane, get_airspeed).once(returns(EXPECTED_AIRSPEED));
   EXPECT_EQ(m_pilot.report_airspeed(m_airplane), EXPECTED_AIRSPEED);
 }

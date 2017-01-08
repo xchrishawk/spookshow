@@ -69,10 +69,10 @@
 /* -- Public Macros -- */
 
 /**
- * Returns a pointer to the Spookshow mock method for the specified object and method name.
+ * Returns the Spookshow mock method for the specified object and method name.
  */
 #define SPOOKSHOW(obj, meth)									\
-  (&((obj).SPOOKSHOW_METHOD_OBJECT_(meth)))
+  ((obj).SPOOKSHOW_METHOD_OBJECT_(meth))
 
 /**
  * Creates a mock for a non-`const` method with no arguments.

@@ -80,19 +80,19 @@ namespace spookshow
         /**
          * Adds a condition which must be true before this method may be called.
          */
-        functor_entry* requires(const condition& condition)
+        functor_entry& requires(const condition& condition)
         {
           m_conditions.push_back(condition);
-          return this;
+          return *this;
         }
 
         /**
          * Adds an expectation to be fulfilled by a successful invocation of this method.
          */
-        functor_entry* fulfills(expectation& expectation)
+        functor_entry& fulfills(expectation& expectation)
         {
           m_expectations.push_back(&expectation);
-          return this;
+          return *this;
         }
 
       private:
@@ -140,13 +140,13 @@ namespace spookshow
       {
         if (!m_functor_queue.empty())
         {
-          const auto& entry = m_functor_queue.front();
+          functor_entry& entry = m_functor_queue.front();
 
           // we have to cache the functor in case we delete the entry from the queue
-          functor functor_copy = entry->m_functor;
+          functor functor_copy = entry.m_functor;
 
           // check conditions on this call
-          for (const auto& condition : entry->m_conditions)
+          for (const condition& condition : entry.m_conditions)
             if (!condition(args...))
             {
               std::ostringstream message;
@@ -156,14 +156,14 @@ namespace spookshow
             }
 
           // fulfill all expectations for this call
-          for (const auto exp : entry->m_expectations)
+          for (expectation* exp : entry.m_expectations)
             exp->fulfill();
 
           // clear the entry from the queue if we're out of available calls
-          if (entry->m_count != INFINITE)
+          if (entry.m_count != INFINITE)
           {
-            entry->m_count = std::max(entry->m_count - 1, 0);
-            if (entry->m_count == 0)
+            entry.m_count = std::max(entry.m_count - 1, 0);
+            if (entry.m_count == 0)
               m_functor_queue.pop();
           }
 
@@ -196,14 +196,14 @@ namespace spookshow
        */
       void reset() const
       {
-        std::queue<std::shared_ptr<functor_entry>> empty;
+        std::queue<functor_entry> empty;
         std::swap(m_functor_queue, empty);
       }
 
       /**
        * Enqueues a no-op which may be performed once.
        */
-      std::shared_ptr<functor_entry> once(const spookshow::internal::noops_token&) const
+      functor_entry& once(const spookshow::internal::noops_token&) const
       {
         return once([] (TArgs...) -> void { });
       }
@@ -212,7 +212,7 @@ namespace spookshow
        * Enqueues a value which may be returned once.
        */
       template <typename TValue>
-        std::shared_ptr<functor_entry> once(const spookshow::internal::returns_token<TValue>& token) const
+      functor_entry& once(const spookshow::internal::returns_token<TValue>& token) const
       {
         return once([token] (TArgs...) -> TValue {
             return token.value();
@@ -222,7 +222,7 @@ namespace spookshow
       /**
        * Enqueues a functor which may be performed once.
        */
-      std::shared_ptr<functor_entry> once(const functor& functor) const
+      functor_entry& once(const functor& functor) const
       {
         return enqueue_functor(functor, 1);
       }
@@ -230,7 +230,7 @@ namespace spookshow
       /**
        * Enqueues a no-op which may be performed a finite number of times.
        */
-      std::shared_ptr<functor_entry> repeats(int count, const spookshow::internal::noops_token&) const
+      functor_entry& repeats(int count, const spookshow::internal::noops_token&) const
       {
         return repeats(count, [] (TArgs...) -> void { });
       }
@@ -239,7 +239,7 @@ namespace spookshow
        * Enqueues a value which may be returned a finite number of times.
        */
       template <typename TValue>
-        std::shared_ptr<functor_entry> repeats(int count, const spookshow::internal::returns_token<TValue>& token) const
+      functor_entry& repeats(int count, const spookshow::internal::returns_token<TValue>& token) const
       {
         return repeats(count, [token] (TArgs...) -> TValue {
             return token.value();
@@ -249,7 +249,7 @@ namespace spookshow
       /**
        * Enqueues a functor which may be performed a finite number of times.
        */
-      std::shared_ptr<functor_entry> repeats(int count, const functor& functor) const
+      functor_entry& repeats(int count, const functor& functor) const
       {
         return enqueue_functor(functor, count);
       }
@@ -257,7 +257,7 @@ namespace spookshow
       /**
        * Enqueues a no-op which may be performed an infinite number of times.
        */
-      std::shared_ptr<functor_entry> always(const spookshow::internal::noops_token&) const
+      functor_entry& always(const spookshow::internal::noops_token&) const
       {
         return always([] (TArgs...) -> void { });
       }
@@ -266,7 +266,7 @@ namespace spookshow
        * Enqueues a value which may be returned an infinite number of times.
        */
       template <typename TValue>
-        std::shared_ptr<functor_entry> always(const spookshow::internal::returns_token<TValue>& token) const
+      functor_entry& always(const spookshow::internal::returns_token<TValue>& token) const
       {
         return always([token] (TArgs...) -> TValue {
             return token.value();
@@ -276,7 +276,7 @@ namespace spookshow
       /**
        * Enqueues a functor which may be performed an infinite number of times.
        */
-      std::shared_ptr<functor_entry> always(const functor& functor) const
+      functor_entry& always(const functor& functor) const
       {
         return enqueue_functor(functor, INFINITE);
       }
@@ -292,18 +292,18 @@ namespace spookshow
        * @param count
        * The number of times this functor may be executed.
        */
-      std::shared_ptr<functor_entry> enqueue_functor(const functor& functor, int count) const
+      functor_entry& enqueue_functor(const functor& functor, int count) const
       {
         if (count < 1 && count != INFINITE)
           spookshow::internal::handle_error("Specified functor count was invalid!");
 
-        auto entry = std::shared_ptr<functor_entry>(new functor_entry(functor, count));
+        functor_entry entry(functor, count);
         m_functor_queue.push(entry);
-        return entry;
+        return m_functor_queue.back();
       }
 
       mutable std::string m_name;
-      mutable std::queue<std::shared_ptr<functor_entry>> m_functor_queue;
+      mutable std::queue<functor_entry> m_functor_queue;
 
     };
 
