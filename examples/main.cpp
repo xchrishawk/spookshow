@@ -173,17 +173,11 @@ TEST_F(PilotTest, TakeOffAirplane)
 TEST_F(PilotTest, LandAirplane)
 {
   // This is similar to the above test case, but it should uncover a bug.
+  // In addition, we use the convenience macro `SPOOKSHOW_EXPECT_ONCE` to create a unique
+  // expectation and tie it to a functor call with a single line of code.
   expectation_order order;
-  expectation gear_extended("set_gear_extended(true) called");
-  expectation landed("land() called");
-
-  SPOOKSHOW(m_airplane, set_gear_extended)
-    .once(noops())
-    .requires(arg_eq<0>(true))
-    .fulfills(gear_extended);
-  SPOOKSHOW(m_airplane, land)
-    .once(noops())
-    .fulfills(landed);
+  SPOOKSHOW_EXPECT_ONCE(m_airplane, set_gear_extended, noops()).requires(arg_eq<0>(true));
+  SPOOKSHOW_EXPECT_ONCE(m_airplane, land, noops());
 
   m_pilot.land_airplane(m_airplane);
 }

@@ -65,6 +65,17 @@
   }												\
   spookshow::internal::method<ret(t0, t1, t2, t3, t4)> SPOOKSHOW_METHOD_OBJECT_(meth) { #meth }
 
+// http://stackoverflow.com/a/17624752/434245
+#define SPOOKSHOW_UNIQUE_(base, counter)							\
+  SPOOKSHOW_UNIQUE_1_(base, counter)
+#define SPOOKSHOW_UNIQUE_1_(base, counter)							\
+  SPOOKSHOW_UNIQUE_2_(!, base ## _ ## counter ## _)
+#define SPOOKSHOW_UNIQUE_2_(unused, name)							\
+  name
+
+#define SPOOKSHOW_EXPECT_IMPL_(exp, count, obj, meth, action)    				\
+  spookshow::expectation exp(#obj "." #meth "()", count);					\
+  SPOOKSHOW(obj, meth).action.fulfills(exp)
 
 /* -- Public Macros -- */
 
@@ -145,3 +156,21 @@
  */
 #define SPOOKSHOW_MOCK_CONST_METHOD_5(ret, meth, t0, t1, t2, t3, t4)				\
   SPOOKSHOW_MOCK_METHOD_5_IMPL_(ret, meth, const, t0, t1, t2, t3, t4)
+
+/**
+ * Expects that a method will be called once.
+ */
+#define SPOOKSHOW_EXPECT_ONCE(obj, meth, action)						\
+  SPOOKSHOW_EXPECT_IMPL_(SPOOKSHOW_UNIQUE_(EXPECT, __LINE__), 1, obj, meth, once(action))
+
+/**
+ * Expects that a method will be called a specified number of times.
+ */
+#define SPOOKSHOW_EXPECT_REPEATS(obj, meth, action, count)		                    	\
+  SPOOKSHOW_EXPECT_IMPL_(SPOOKSHOW_UNIQUE_(EXPECT, __LINE__), count, obj, meth, repeats(count, action))
+
+/**
+ * Expects that a method will be called once, but allow an infinite number of calls.
+ */
+#define SPOOKSHOW_EXPECT_ALWAYS(obj, meth, action)						\
+  SPOOKSHOW_EXPECT_IMPL_(SPOOKSHOW_UNIQUE_(EXPECT, __LINE__), 1, obj, meth, always(action))

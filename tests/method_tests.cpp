@@ -332,3 +332,70 @@ TEST_F(MethodTests, FailsWithUnsuccessfulConditionFunctorObject)
   m_mock.void_two_args(EXPECTED_ARG_1, EXPECTED_ARG_2);
   EXPECT_FAILED();
 }
+
+TEST_F(MethodTests, ExpectOnceMacroSucceeds)
+{
+  static const int EXPECTED_ARG = 200;
+  // for scope
+  {
+    SPOOKSHOW_EXPECT_ONCE(m_mock, void_one_arg, noops()).requires(arg_eq<0>(EXPECTED_ARG));
+    m_mock.void_one_arg(EXPECTED_ARG);
+  }
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectOnceMacroFails)
+{
+  static const int EXPECTED_ARG = 300;
+  // for scope
+  {
+    SPOOKSHOW_EXPECT_ONCE(m_mock, void_one_arg, noops()).requires(arg_eq<0>(EXPECTED_ARG));
+    m_mock.void_one_arg(EXPECTED_ARG + 1);
+  }
+  EXPECT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectRepeatsMacroSucceeds)
+{
+  static const int EXPECTED_COUNT = 3;
+  // for scope
+  {
+    SPOOKSHOW_EXPECT_REPEATS(m_mock, void_no_args, noops(), EXPECTED_COUNT);
+    for (int idx = 0; idx < EXPECTED_COUNT; idx++)
+      m_mock.void_no_args();
+  }
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectRepeatsMacroFails)
+{
+  static const int EXPECTED_COUNT = 3;
+  // for scope
+  {
+    SPOOKSHOW_EXPECT_REPEATS(m_mock, void_no_args, noops(), EXPECTED_COUNT);
+    for (int idx = 0; idx < EXPECTED_COUNT - 1; idx++)
+      m_mock.void_no_args();
+  }
+  EXPECT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectAlwaysMacroSucceeds)
+{
+  static const int EXPECTED_ARG = -500;
+  // for scope
+  {
+    SPOOKSHOW_EXPECT_ALWAYS(m_mock, void_one_arg, noops()).requires(arg_eq<0>(EXPECTED_ARG));
+    for (int idx = 0; idx < 100; idx++)
+      m_mock.void_one_arg(EXPECTED_ARG);
+  }
+  EXPECT_NOT_FAILED();
+}
+
+TEST_F(MethodTests, ExpectAlwaysMacroFails)
+{
+  // for scope
+  {
+    SPOOKSHOW_EXPECT_ALWAYS(m_mock, void_one_arg, noops());
+  }
+  EXPECT_FAILED();
+}
