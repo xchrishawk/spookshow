@@ -18,6 +18,4 @@ before_install:
   - cd ${TRAVIS_BUILD_DIR}
 
 script:
-  - mkdir build
-  - cd build
-  - cmake .. && make && make spookshow_examples && make spookshow_tests && ./spookshow_tests
+  - ./init.sh

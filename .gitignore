@@ -1,2 +1,2 @@
-# Working directory for CMake
+.dir-locals.el
 build/
